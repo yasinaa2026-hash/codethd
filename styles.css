@@ -194,7 +194,7 @@ header {
 .main-editor {
     display: flex;
     flex: 1;
-    gap: 2px;
+    gap: 0;
     background: var(--border-color);
     overflow: hidden;
     animation: fadeIn 0.6s ease 0.2s backwards;
@@ -210,16 +210,60 @@ header {
 }
 
 /* ============================================
-   لوحات المحرر
+   لوحات المحرر مع تأثيرات السحب
    ============================================ */
 .panel {
     flex: 1;
     display: flex;
     flex-direction: column;
     background: var(--bg-secondary);
-    border-radius: 4px;
+    border-radius: 0;
     overflow: hidden;
     box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
+    position: relative;
+    min-width: 200px;
+}
+
+.panel.active-resize {
+    box-shadow: inset 0 0 20px rgba(102, 126, 234, 0.3);
+}
+
+/* خط السحب الأفقي */
+.resize-handle {
+    position: absolute;
+    right: -2px;
+    top: 0;
+    width: 4px;
+    height: 100%;
+    cursor: col-resize;
+    background: transparent;
+    transition: background 0.2s ease;
+    z-index: 10;
+}
+
+.resize-handle:hover,
+.resize-handle.dragging {
+    background: var(--accent-secondary);
+    box-shadow: 0 0 10px rgba(102, 126, 234, 0.6);
+}
+
+/* خط السحب الرأسي (للأجهزة المحمولة) */
+.resize-handle-vertical {
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    cursor: row-resize;
+    background: transparent;
+    transition: background 0.2s ease;
+    z-index: 10;
+}
+
+.resize-handle-vertical:hover,
+.resize-handle-vertical.dragging {
+    background: var(--accent-secondary);
+    box-shadow: 0 0 10px rgba(102, 126, 234, 0.6);
 }
 
 .panel-header {
@@ -235,6 +279,7 @@ header {
     gap: 8px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    user-select: none;
 }
 
 .panel-icon {
@@ -312,9 +357,15 @@ textarea::placeholder {
     display: flex;
     flex-direction: column;
     background: var(--preview-bg);
-    border-radius: 4px;
+    border-radius: 0;
     overflow: hidden;
     box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
+    position: relative;
+    min-width: 200px;
+}
+
+.preview-container.active-resize {
+    box-shadow: inset 0 0 20px rgba(102, 126, 234, 0.3);
 }
 
 #preview-area {
@@ -370,6 +421,19 @@ textarea::placeholder {
 }
 
 /* ============================================
+   تأثيرات السحب - Resize Cursor
+   ============================================ */
+body.resizing-horizontal {
+    cursor: col-resize !important;
+    user-select: none;
+}
+
+body.resizing-vertical {
+    cursor: row-resize !important;
+    user-select: none;
+}
+
+/* ============================================
    التأثيرات عند تحريك الماوس - Mouse Effects
    ============================================ */
 .cursor-glow {
@@ -393,11 +457,21 @@ body.mouse-effects .cursor-glow {
 @media (max-width: 1024px) {
     .main-editor {
         flex-direction: column;
+        gap: 0;
     }
 
     .panel {
-        flex: 0.5;
+        flex: 1;
         min-height: 150px;
+        border-radius: 0;
+    }
+
+    .resize-handle {
+        display: none;
+    }
+
+    .resize-handle-vertical {
+        display: block;
     }
 
     .preview-container {
@@ -427,7 +501,7 @@ body.mouse-effects .cursor-glow {
     }
 
     .main-editor {
-        gap: 1px;
+        gap: 0;
     }
 
     .panel-header {
@@ -510,3 +584,4 @@ textarea,
 #preview-area {
     transition: none;
 }
+
