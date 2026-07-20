@@ -1,0 +1,512 @@
+/* ============================================
+   متغيرات CSS للتحكم بالألوان
+   ============================================ */
+:root {
+    --bg-primary: #000;
+    --bg-secondary: #1e1e1e;
+    --bg-tertiary: #151515;
+    --text-primary: #fff;
+    --text-secondary: #888;
+    --border-color: #333;
+    --accent-color: #0f0;
+    --accent-secondary: #667eea;
+    --preview-bg: #fff;
+    --shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    --shadow-sm: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* الوضع الليلي - Dark Mode */
+body.dark-mode {
+    --bg-primary: #000;
+    --bg-secondary: #1e1e1e;
+    --bg-tertiary: #151515;
+    --text-primary: #fff;
+    --text-secondary: #888;
+    --preview-bg: #000;
+}
+
+/* الوضع الفاتح - Light Mode */
+body.light-mode {
+    --bg-primary: #f5f5f5;
+    --bg-secondary: #ffffff;
+    --bg-tertiary: #f0f0f0;
+    --text-primary: #333;
+    --text-secondary: #666;
+    --border-color: #ddd;
+    --accent-color: #667eea;
+    --accent-secondary: #764ba2;
+    --preview-bg: #fff;
+}
+
+/* ============================================
+   إعدادات عامة
+   ============================================ */
+* {
+    box-sizing: border-box;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+}
+
+/* ============================================
+   زر تبديل الوضع الليلي
+   ============================================ */
+.theme-toggle {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 1000;
+    cursor: pointer;
+    font-size: 24px;
+    background: var(--bg-secondary);
+    border: 2px solid var(--border-color);
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-sm);
+}
+
+.theme-toggle:hover {
+    transform: scale(1.1) rotate(20deg);
+    box-shadow: 0 0 20px rgba(102, 126, 234, 0.5);
+}
+
+.theme-icon {
+    display: block;
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+}
+
+/* ============================================
+   رأس الصفحة
+   ============================================ */
+header {
+    background: var(--bg-secondary);
+    padding: 15px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid var(--border-color);
+    box-shadow: var(--shadow-sm);
+    animation: slideDown 0.5s ease;
+}
+
+@keyframes slideDown {
+    from {
+        transform: translateY(-100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 24px;
+    font-weight: bold;
+    background: linear-gradient(135deg, var(--accent-secondary) 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.logo-icon {
+    font-size: 28px;
+    animation: spin 4s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.header-actions {
+    display: flex;
+    gap: 10px;
+}
+
+/* ============================================
+   الأزرار
+   ============================================ */
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: capitalize;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--accent-secondary) 0%, #764ba2 100%);
+    color: white;
+    box-shadow: var(--shadow-sm);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+}
+
+.btn-secondary {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+}
+
+.btn-secondary:hover {
+    background: var(--bg-secondary);
+    box-shadow: 0 0 15px rgba(102, 126, 234, 0.3);
+    border-color: var(--accent-secondary);
+}
+
+/* ============================================
+   المحرر الرئيسي
+   ============================================ */
+.main-editor {
+    display: flex;
+    flex: 1;
+    gap: 2px;
+    background: var(--border-color);
+    overflow: hidden;
+    animation: fadeIn 0.6s ease 0.2s backwards;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* ============================================
+   لوحات المحرر
+   ============================================ */
+.panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-secondary);
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+.panel-header {
+    background: var(--bg-tertiary);
+    padding: 10px 15px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.panel-icon {
+    font-size: 16px;
+    animation: bounce 2s ease-in-out infinite;
+}
+
+.panel:nth-child(1) .panel-icon {
+    animation-delay: 0s;
+}
+
+.panel:nth-child(2) .panel-icon {
+    animation-delay: 0.2s;
+}
+
+.panel:nth-child(3) .panel-icon {
+    animation-delay: 0.4s;
+}
+
+.panel:nth-child(4) .panel-icon {
+    animation-delay: 0.6s;
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+}
+
+/* ============================================
+   منطقة النصوص
+   ============================================ */
+textarea {
+    flex: 1;
+    background: var(--bg-tertiary);
+    border: none;
+    color: var(--accent-color);
+    padding: 15px;
+    resize: none;
+    outline: none;
+    font-family: 'Fira Code', 'Courier New', Courier, monospace;
+    direction: ltr;
+    text-align: left;
+    font-size: 14px;
+    line-height: 1.6;
+    overflow: auto;
+}
+
+textarea::-webkit-scrollbar {
+    width: 8px;
+}
+
+textarea::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+}
+
+textarea::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 4px;
+}
+
+textarea::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-secondary);
+}
+
+textarea::placeholder {
+    color: var(--text-secondary);
+    opacity: 0.5;
+}
+
+/* ============================================
+   منطقة المعاينة
+   ============================================ */
+.preview-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: var(--preview-bg);
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+#preview-area {
+    flex: 1;
+    background: var(--preview-bg);
+    border: none;
+    width: 100%;
+    height: 100%;
+}
+
+/* ============================================
+   جزيئات عائمة - الفقاعات والنجوم
+   ============================================ */
+.floating-particles {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: -1;
+}
+
+.particle {
+    position: absolute;
+    pointer-events: none;
+    animation: float-up 3s linear forwards;
+}
+
+.particle.star {
+    font-size: 20px;
+}
+
+.particle.bubble {
+    border: 1px solid rgba(102, 126, 234, 0.3);
+    border-radius: 50%;
+    backdrop-filter: blur(10px);
+}
+
+.particle.spark {
+    font-size: 12px;
+}
+
+@keyframes float-up {
+    0% {
+        transform: translateY(0) translateX(0) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-100vh) translateX(100px) scale(0);
+        opacity: 0;
+    }
+}
+
+/* ============================================
+   التأثيرات عند تحريك الماوس - Mouse Effects
+   ============================================ */
+.cursor-glow {
+    position: fixed;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    box-shadow: 0 0 15px rgba(102, 126, 234, 0.6);
+    pointer-events: none;
+    z-index: 999;
+    display: none;
+}
+
+body.mouse-effects .cursor-glow {
+    display: block;
+}
+
+/* ============================================
+   الاستجابة للأجهزة المحمولة
+   ============================================ */
+@media (max-width: 1024px) {
+    .main-editor {
+        flex-direction: column;
+    }
+
+    .panel {
+        flex: 0.5;
+        min-height: 150px;
+    }
+
+    .preview-container {
+        flex: 1;
+    }
+}
+
+@media (max-width: 768px) {
+    header {
+        flex-direction: column;
+        gap: 15px;
+        padding: 10px 15px;
+    }
+
+    .logo {
+        font-size: 20px;
+    }
+
+    .header-actions {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .btn {
+        font-size: 12px;
+        padding: 8px 15px;
+    }
+
+    .main-editor {
+        gap: 1px;
+    }
+
+    .panel-header {
+        padding: 8px 10px;
+        font-size: 10px;
+    }
+
+    textarea {
+        padding: 10px;
+        font-size: 12px;
+    }
+
+    .theme-toggle {
+        top: 10px;
+        left: 10px;
+        width: 40px;
+        height: 40px;
+        font-size: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .main-editor {
+        flex-direction: column;
+    }
+
+    .panel {
+        flex: 1;
+        min-height: 100px;
+    }
+
+    header {
+        gap: 10px;
+        padding: 8px 10px;
+    }
+
+    .logo {
+        font-size: 18px;
+    }
+
+    .btn {
+        font-size: 11px;
+        padding: 6px 12px;
+    }
+
+    .panel-header {
+        padding: 6px 8px;
+    }
+
+    textarea {
+        padding: 8px;
+        font-size: 11px;
+    }
+}
+
+/* ============================================
+   تأثيرات التحميل والانتقالات
+   ============================================ */
+@keyframes shimmer {
+    0% {
+        background-position: -1000px 0;
+    }
+    100% {
+        background-position: 1000px 0;
+    }
+}
+
+/* تأثير التركيز على حقول الإدخال */
+textarea:focus {
+    box-shadow: inset 0 0 10px rgba(102, 126, 234, 0.2);
+}
+
+/* حركات الانتقال الناعمة */
+* {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* تجنب الانتقالات على الخصائص الثقيلة */
+textarea,
+#preview-area {
+    transition: none;
+}
