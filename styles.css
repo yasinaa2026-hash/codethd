@@ -189,6 +189,39 @@ header {
 }
 
 /* ============================================
+   تبويبات الجوال - Mobile Tabs
+   ============================================ */
+.tabs-container {
+    display: none;
+    background: var(--bg-secondary);
+    border-bottom: 2px solid var(--border-color);
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 0 10px;
+}
+
+.tab-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    padding: 12px 15px;
+    cursor: pointer;
+    font-size: 13px;
+    white-space: nowrap;
+    transition: all 0.3s ease;
+    border-bottom: 3px solid transparent;
+}
+
+.tab-btn:hover {
+    color: var(--text-primary);
+}
+
+.tab-btn.active {
+    color: var(--accent-secondary);
+    border-bottom-color: var(--accent-secondary);
+}
+
+/* ============================================
    المحرر الرئيسي
    ============================================ */
 .main-editor {
@@ -222,6 +255,11 @@ header {
     box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
     position: relative;
     min-width: 200px;
+    display: none;
+}
+
+.panel.active {
+    display: flex;
 }
 
 .panel.active-resize {
@@ -280,6 +318,7 @@ header {
     text-transform: uppercase;
     letter-spacing: 0.5px;
     user-select: none;
+    justify-content: space-between;
 }
 
 .panel-icon {
@@ -309,44 +348,71 @@ header {
 }
 
 /* ============================================
-   منطقة النصوص
+   محرر الأكواد - CodeMirror Styling
    ============================================ */
-textarea {
+.editor-wrapper {
     flex: 1;
+    overflow: hidden;
     background: var(--bg-tertiary);
+}
+
+.CodeMirror {
+    height: 100% !important;
+    background: var(--bg-tertiary) !important;
+    color: var(--text-primary) !important;
+    font-family: 'Fira Code', 'Courier New', Courier, monospace !important;
+    font-size: 14px !important;
+    line-height: 1.6 !important;
+    direction: ltr !important;
+}
+
+.CodeMirror-gutters {
+    background: var(--bg-secondary) !important;
+    border-right: 1px solid var(--border-color) !important;
+}
+
+.CodeMirror-linenumber {
+    color: var(--text-secondary) !important;
+}
+
+.CodeMirror-cursor {
+    border-left-color: var(--accent-secondary) !important;
+}
+
+.CodeMirror-selected {
+    background: rgba(102, 126, 234, 0.3) !important;
+}
+
+.CodeMirror-line::selection,
+.CodeMirror-line > span::selection,
+.CodeMirror-line > span > span::selection {
+    background: rgba(102, 126, 234, 0.3) !important;
+}
+
+.CodeMirror-line::-moz-selection,
+.CodeMirror-line > span::-moz-selection,
+.CodeMirror-line > span > span::-moz-selection {
+    background: rgba(102, 126, 234, 0.3) !important;
+}
+
+/* ============================================
+   أزرار النسخ
+   ============================================ */
+.copy-btn {
+    background: none;
     border: none;
-    color: var(--accent-color);
-    padding: 15px;
-    resize: none;
-    outline: none;
-    font-family: 'Fira Code', 'Courier New', Courier, monospace;
-    direction: ltr;
-    text-align: left;
-    font-size: 14px;
-    line-height: 1.6;
-    overflow: auto;
-}
-
-textarea::-webkit-scrollbar {
-    width: 8px;
-}
-
-textarea::-webkit-scrollbar-track {
-    background: var(--bg-secondary);
-}
-
-textarea::-webkit-scrollbar-thumb {
-    background: var(--border-color);
-    border-radius: 4px;
-}
-
-textarea::-webkit-scrollbar-thumb:hover {
-    background: var(--accent-secondary);
-}
-
-textarea::placeholder {
     color: var(--text-secondary);
-    opacity: 0.5;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    margin-left: auto;
+}
+
+.copy-btn:hover {
+    background: var(--bg-secondary);
+    color: var(--accent-secondary);
 }
 
 /* ============================================
@@ -377,7 +443,66 @@ textarea::placeholder {
 }
 
 /* ============================================
-   جزيئات عائمة - الفقاعات والنجوم
+   وحدة التحكم - Console
+   ============================================ */
+.console-output {
+    flex: 1;
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    padding: 15px;
+    overflow-y: auto;
+    font-family: 'Fira Code', 'Courier New', Courier, monospace;
+    font-size: 13px;
+    line-height: 1.5;
+    direction: ltr;
+    text-align: left;
+}
+
+.console-output:empty::before {
+    content: 'جاهز للإخراج...';
+    color: var(--text-secondary);
+}
+
+.console-log {
+    color: var(--text-primary);
+    margin: 5px 0;
+}
+
+.console-error {
+    color: #ff6b6b;
+    margin: 5px 0;
+    font-weight: bold;
+}
+
+.console-warn {
+    color: #ffd93d;
+    margin: 5px 0;
+}
+
+.console-info {
+    color: var(--accent-secondary);
+    margin: 5px 0;
+}
+
+.console-output::-webkit-scrollbar {
+    width: 8px;
+}
+
+.console-output::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+}
+
+.console-output::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 4px;
+}
+
+.console-output::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-secondary);
+}
+
+/* ============================================
+   جزيئات عائ��ة - الفقاعات والنجوم
    ============================================ */
 .floating-particles {
     position: fixed;
@@ -434,24 +559,6 @@ body.resizing-vertical {
 }
 
 /* ============================================
-   التأثيرات عند تحريك الماوس - Mouse Effects
-   ============================================ */
-.cursor-glow {
-    position: fixed;
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    box-shadow: 0 0 15px rgba(102, 126, 234, 0.6);
-    pointer-events: none;
-    z-index: 999;
-    display: none;
-}
-
-body.mouse-effects .cursor-glow {
-    display: block;
-}
-
-/* ============================================
    الاستجابة للأجهزة المحمولة
    ============================================ */
 @media (max-width: 1024px) {
@@ -493,6 +600,7 @@ body.mouse-effects .cursor-glow {
     .header-actions {
         width: 100%;
         justify-content: center;
+        flex-wrap: wrap;
     }
 
     .btn {
@@ -502,16 +610,32 @@ body.mouse-effects .cursor-glow {
 
     .main-editor {
         gap: 0;
+        flex-direction: row;
+    }
+
+    .tabs-container {
+        display: flex;
+    }
+
+    .panel {
+        display: none !important;
+    }
+
+    .panel.active {
+        display: flex !important;
+    }
+
+    .preview-container {
+        display: none !important;
+    }
+
+    .preview-container.active {
+        display: flex !important;
     }
 
     .panel-header {
         padding: 8px 10px;
         font-size: 10px;
-    }
-
-    textarea {
-        padding: 10px;
-        font-size: 12px;
     }
 
     .theme-toggle {
@@ -521,11 +645,15 @@ body.mouse-effects .cursor-glow {
         height: 40px;
         font-size: 20px;
     }
+
+    .CodeMirror {
+        font-size: 12px !important;
+    }
 }
 
 @media (max-width: 480px) {
     .main-editor {
-        flex-direction: column;
+        flex-direction: row;
     }
 
     .panel {
@@ -551,8 +679,12 @@ body.mouse-effects .cursor-glow {
         padding: 6px 8px;
     }
 
-    textarea {
-        padding: 8px;
+    .CodeMirror {
+        font-size: 11px !important;
+    }
+
+    .tab-btn {
+        padding: 10px 12px;
         font-size: 11px;
     }
 }
@@ -570,8 +702,8 @@ body.mouse-effects .cursor-glow {
 }
 
 /* تأثير التركيز على حقول الإدخال */
-textarea:focus {
-    box-shadow: inset 0 0 10px rgba(102, 126, 234, 0.2);
+.CodeMirror-focused {
+    box-shadow: inset 0 0 10px rgba(102, 126, 234, 0.2) !important;
 }
 
 /* حركات الانتقال الناعمة */
@@ -580,8 +712,7 @@ textarea:focus {
 }
 
 /* تجنب الانتقالات على الخصائص الثقيلة */
-textarea,
+.CodeMirror,
 #preview-area {
     transition: none;
 }
-
