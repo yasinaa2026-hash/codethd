@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>تسجيل الدخول - Codethd</title>
+  <style>
+    body {
+      background-color: #0d1117;
+      color: #c9d1d9;
+      font-family: system-ui, -apple-system, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+    .login-container {
+      background-color: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 8px;
+      padding: 30px;
+      width: 100%;
+      max-width: 360px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    }
+    .login-container h2 {
+      margin-top: 0;
+      color: #58a6ff;
+      text-align: center;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 14px;
+    }
+    .form-group input {
+      width: 100%;
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: 1px solid #30363d;
+      background-color: #0d1117;
+      color: #c9d1d9;
+      box-sizing: border-box;
+    }
+    .form-group input:focus {
+      outline: none;
+      border-color: #58a6ff;
+    }
+    .btn-submit {
+      width: 100%;
+      padding: 10px;
+      background-color: #238636;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .btn-submit:hover {
+      background-color: #2ea043;
+    }
+    #msg {
+      margin-top: 15px;
+      text-align: center;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="login-container">
+    <h2>تسجيل الدخول</h2>
+    <form id="loginForm">
+      <div class="form-group">
+        <label for="email">البريد الإلكتروني</label>
+        <input type="email" id="email" required placeholder="example@domain.com">
+      </div>
+      <div class="form-group">
+        <label for="password">كلمة المرور</label>
+        <input type="password" id="password" required placeholder="••••••••">
+      </div>
+      <button type="submit" class="btn-submit">دخول</button>
+    </form>
+    <div id="msg"></div>
+  </div>
+
+  <script>
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const msg = document.getElementById('msg');
+      msg.style.color = '#3fb950';
+      msg.textContent = 'جاري التحقق من البيانات...';
+    });
+  </script>
+
+</body>
+</html>
