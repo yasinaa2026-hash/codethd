@@ -6,8 +6,8 @@
 <title>لغات البرمجة - Codethd</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🦊</text></svg>">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/material-darker.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.8/codemirror.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.8/theme/material-darker.min.css">
 <style>
 :root{--bg:#121212;--panel:#1e1e1e;--header:#181818;--text:#e0e0e0;--muted:#9ca3af;--border:#2a2a2a;--accent:#20c997;--accent2:#12b886}
 body.light{--bg:#f8f9fa;--panel:#fff;--header:#e9ecef;--text:#212529;--muted:#6c757d;--border:#dee2e6;--accent:#0ca678;--accent2:#099268}
@@ -183,9 +183,9 @@ select:focus,.search:focus{border-color:var(--accent)}
 </div>
 <div class="note">ملاحظة: الصفحة توفر تلوينًا وتحليلاً مناسبًا لعدد كبير من اللغات عبر CodeMirror. تشغيل كل لغة داخل المتصفح ليس ممكنًا مباشرة؛ لذلك هذه الصفحة مخصصة للتحرير والتجربة وكتابة الكود.</div>
 </main>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/mode/loadmode.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/meta.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.8/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.8/addon/mode/loadmode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.8/mode/meta.min.js"></script>
 <script>
 const select=document.getElementById('languageSelect');
 const search=document.getElementById('search');
@@ -200,7 +200,7 @@ Python:'print("Hello Codethd")',
 Java:'public class Main { public static void main(String[] args) { System.out.println("Hello Codethd"); } }',
 C:'#include <stdio.h>\nint main(){ printf("Hello Codethd"); return 0; }',
 'C++':'#include <iostream>\nint main(){ std::cout << "Hello Codethd"; }',
-CSharp:'using System;\nclass Program { static void Main(){ Console.WriteLine("Hello Codethd"); } }',
+'C#':'using System;\nclass Program { static void Main(){ Console.WriteLine("Hello Codethd"); } }',
 Rust:'fn main() { println!("Hello Codethd"); }',
 Go:'package main\nimport "fmt"\nfunc main(){ fmt.Println("Hello Codethd") }',
 PHP:'<?php echo "Hello Codethd"; ?>',
@@ -214,7 +214,7 @@ Markdown:'# Hello Codethd\n\nWrite your notes here.',
 YAML:'name: Codethd\nversion: 1.0'
 };
 let editor=null;
-CodeMirror.modeURL='https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/%N/%N.js';
+CodeMirror.modeURL='https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.8/mode/%N/%N.js';
 function findMode(name){
   if(window.CodeMirror && Array.isArray(CodeMirror.modeInfo)){
     return CodeMirror.findModeByName ? CodeMirror.findModeByName(name) : CodeMirror.modeInfo.find(m=>m.name.toLowerCase()===name.toLowerCase());
