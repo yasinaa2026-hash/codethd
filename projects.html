@@ -161,6 +161,7 @@
                 localStorage.setItem('codethd-html',project.html||'');
                 localStorage.setItem('codethd-css',project.css||'');
                 localStorage.setItem('codethd-js',project.js||'');
+                if(project.id) localStorage.setItem('codethd-active-project-id',project.id);
                 window.location.href='index.html';
             });
         });
@@ -182,23 +183,32 @@
         const html=localStorage.getItem('codethd-html')||'';
         const css=localStorage.getItem('codethd-css')||'';
         const js=localStorage.getItem('codethd-js')||'';
+        const projects=getProjects();
+        const activeId=localStorage.getItem('codethd-active-project-id');
+        const now=new Date().toLocaleString('ar-SA');
 
-        if(!html.trim() && !css.trim() && !js.trim()){
-            alert('لا يوجد كود محفوظ لحفظه كمشروع.');
-            return;
+        if(activeId){
+            const index=projects.findIndex(project=>project.id===activeId);
+            if(index!==-1){
+                projects[index]={...projects[index],html,css,js,date:now};
+                localStorage.setItem(projectKey,JSON.stringify(projects));
+                render();
+                alert('تم حفظ المشروع وتحديثه بنجاح ✓');
+                return;
+            }
         }
 
-        const name=prompt('اكتب اسم المشروع:','مشروع Codethd');
-        if(name===null)return;
-
-        const projects=getProjects();
-        projects.unshift({
-            name:name.trim()||'مشروع بدون اسم',
+        const project={
+            id:(window.crypto&&crypto.randomUUID)?crypto.randomUUID():String(Date.now()),
+            name:'مشروع Codethd',
             html,css,js,
-            date:new Date().toLocaleString('ar-SA')
-        });
+            date:now
+        };
+        projects.unshift(project);
         localStorage.setItem(projectKey,JSON.stringify(projects));
+        localStorage.setItem('codethd-active-project-id',project.id);
         render();
+        alert('تم حفظ المشروع بنجاح ✓');
     });
 
     applyTheme();
