@@ -1,263 +1,36 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>لغات البرمجة - Codethd</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🦊</text></svg>">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.8/codemirror.min.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.8/theme/material-darker.min.css">
 <style>
-:root{--bg:#121212;--panel:#1e1e1e;--header:#181818;--text:#e0e0e0;--muted:#9ca3af;--border:#2a2a2a;--accent:#20c997;--accent2:#12b886}
-body.light{--bg:#f8f9fa;--panel:#fff;--header:#e9ecef;--text:#212529;--muted:#6c757d;--border:#dee2e6;--accent:#0ca678;--accent2:#099268}
+:root{--bg:#121212;--panel:#1e1e1e;--header:#181818;--text:#e0e0e0;--muted:#9ca3af;--border:#2a2a2a;--accent:#20c997}
+body.light{--bg:#f8f9fa;--panel:#fff;--header:#e9ecef;--text:#212529;--muted:#6c757d;--border:#dee2e6;--accent:#0ca678}
 *{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',Tahoma,sans-serif}
-body{min-height:100vh;background:var(--bg);color:var(--text)}
+body{min-height:100vh;background:var(--bg);color:var(--text);opacity:0;transform:translateY(8px);animation:pageIn .35s ease forwards}
+@keyframes pageIn{to{opacity:1;transform:none}}body.page-exit{animation:pageOut .25s ease forwards}@keyframes pageOut{to{opacity:0;transform:translateY(-8px)}}
 header{height:64px;background:var(--header);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:sticky;top:0;z-index:5}
-.logo{display:flex;align-items:center;gap:10px;color:var(--accent);font-size:1.2rem;font-weight:700}
-.actions{display:flex;gap:8px;align-items:center}
-.btn{display:inline-flex;align-items:center;gap:7px;text-decoration:none;background:var(--panel);color:var(--text);border:1px solid var(--border);padding:8px 13px;border-radius:7px;cursor:pointer;font-weight:600}
-.btn:hover{border-color:var(--accent);color:var(--accent)}
-.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
-main{max-width:1200px;margin:0 auto;padding:32px 18px}
-.hero{text-align:center;margin-bottom:22px}.hero i{font-size:38px;color:var(--accent);margin-bottom:10px}.hero h1{font-size:2rem;margin-bottom:6px}.hero p{color:var(--muted)}
-.toolbar{display:grid;grid-template-columns:minmax(220px,1fr) 180px auto;gap:10px;margin-bottom:14px}
-select,.search{width:100%;background:var(--panel);color:var(--text);border:1px solid var(--border);padding:10px 12px;border-radius:8px;outline:none}
-select:focus,.search:focus{border-color:var(--accent)}
-.info{display:flex;justify-content:space-between;gap:10px;color:var(--muted);font-size:.9rem;margin-bottom:10px}
-.editor-wrap{background:var(--panel);border:1px solid var(--border);border-radius:10px;overflow:hidden}
-.editor-head{height:42px;background:var(--header);display:flex;align-items:center;justify-content:space-between;padding:0 12px;border-bottom:1px solid var(--border);font-size:.9rem}
-#editor{height:62vh}.CodeMirror{height:100%;font-size:15px;font-family:Consolas,'Fira Code',monospace}
-.note{margin-top:12px;color:var(--muted);font-size:.85rem}
-@media(max-width:700px){header{padding:0 10px}.hide-mobile{display:none}.toolbar{grid-template-columns:1fr}.info{flex-direction:column}#editor{height:60vh}}
+.logo{display:flex;align-items:center;gap:10px;color:var(--accent);font-size:1.2rem;font-weight:700}.actions{display:flex;gap:8px;align-items:center}
+.btn{display:inline-flex;align-items:center;gap:7px;text-decoration:none;background:var(--panel);color:var(--text);border:1px solid var(--border);padding:8px 13px;border-radius:7px;cursor:pointer;font-weight:600;transition:.2s}.btn:hover{border-color:var(--accent);color:var(--accent);transform:translateY(-1px)}
+main{max-width:1250px;margin:0 auto;padding:34px 18px 55px}.hero{text-align:center;margin-bottom:25px}.hero-icon{width:78px;height:78px;margin:0 auto 14px;border-radius:22px;background:rgba(32,201,151,.1);display:grid;place-items:center;color:var(--accent);font-size:34px}.hero h1{font-size:2rem;margin-bottom:7px}.hero p{color:var(--muted)}
+.toolbar{display:flex;gap:10px;margin-bottom:18px}.search{flex:1;background:var(--panel);color:var(--text);border:1px solid var(--border);padding:11px 13px;border-radius:8px;outline:none;font-size:.95rem}.search:focus{border-color:var(--accent)}.count{color:var(--muted);align-self:center;font-size:.9rem}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px}.language-card{position:relative;overflow:hidden;display:block;text-decoration:none;background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:13px;padding:17px;min-height:145px;transition:transform .22s,border-color .22s,box-shadow .22s;animation:cardIn .4s ease both}.language-card::after{content:"";position:absolute;inset:auto 0 0;height:3px;background:var(--accent);transform:scaleX(0);transition:transform .25s}.language-card:hover{transform:translateY(-5px);border-color:var(--accent);box-shadow:0 12px 30px rgba(32,201,151,.12)}.language-card:hover::after{transform:scaleX(1)}@keyframes cardIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.lang-icon{width:45px;height:45px;border-radius:11px;background:rgba(32,201,151,.1);display:grid;place-items:center;color:var(--accent);font-size:20px;margin-bottom:14px}.lang-name{font-size:1rem;font-weight:700;min-height:24px}.lang-open{margin-top:10px;color:var(--muted);font-size:.8rem}.language-card:hover .lang-open{color:var(--accent)}.empty{text-align:center;padding:45px;color:var(--muted);display:none}
+@media(max-width:700px){header{padding:0 10px}.hide-mobile{display:none}.toolbar{flex-direction:column}.count{align-self:flex-start}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}main{padding:25px 12px 45px}}
 </style>
 </head>
 <body>
-<header>
-<div class="logo"><i class="fa-solid fa-code"></i><span>Codethd</span></div>
-<div class="actions">
-<a class="btn" href="index.html"><i class="fa-solid fa-arrow-right"></i><span class="hide-mobile">العودة للمحرر</span></a>
-<button class="btn" id="themeBtn">🌙</button>
-</div>
-</header>
-<main>
-<section class="hero">
-<i class="fa-solid fa-language"></i>
-<h1>لغات البرمجة</h1>
-<p>اختر من أكثر من 100 لغة وصيغة برمجية مع تلوين نحوي عند توفر نمط CodeMirror.</p>
-</section>
-<div class="toolbar">
-<select id="languageSelect" aria-label="اختر لغة البرمجة">
-<option value="HTML">HTML</option>
-<option value="CSS">CSS</option>
-<option value="JavaScript">JavaScript</option>
-<option value="TypeScript">TypeScript</option>
-<option value="Python">Python</option>
-<option value="Java">Java</option>
-<option value="C">C</option>
-<option value="C++">C++</option>
-<option value="C#">C#</option>
-<option value="Go">Go</option>
-<option value="Rust">Rust</option>
-<option value="Kotlin">Kotlin</option>
-<option value="Swift">Swift</option>
-<option value="Dart">Dart</option>
-<option value="PHP">PHP</option>
-<option value="Ruby">Ruby</option>
-<option value="R">R</option>
-<option value="MATLAB">MATLAB</option>
-<option value="Scala">Scala</option>
-<option value="Perl">Perl</option>
-<option value="Lua">Lua</option>
-<option value="Haskell">Haskell</option>
-<option value="Elixir">Elixir</option>
-<option value="Erlang">Erlang</option>
-<option value="Clojure">Clojure</option>
-<option value="Groovy">Groovy</option>
-<option value="Objective-C">Objective-C</option>
-<option value="Objective-C++">Objective-C++</option>
-<option value="Visual Basic">Visual Basic</option>
-<option value="F#">F#</option>
-<option value="Fortran">Fortran</option>
-<option value="COBOL">COBOL</option>
-<option value="Pascal">Pascal</option>
-<option value="Delphi">Delphi</option>
-<option value="Ada">Ada</option>
-<option value="Assembly">Assembly</option>
-<option value="Bash">Bash</option>
-<option value="PowerShell">PowerShell</option>
-<option value="SQL">SQL</option>
-<option value="PL/SQL">PL/SQL</option>
-<option value="T-SQL">T-SQL</option>
-<option value="GraphQL">GraphQL</option>
-<option value="Sass">Sass</option>
-<option value="Less">Less</option>
-<option value="SCSS">SCSS</option>
-<option value="Vue">Vue</option>
-<option value="Svelte">Svelte</option>
-<option value="React JSX">React JSX</option>
-<option value="Angular TypeScript">Angular TypeScript</option>
-<option value="Solidity">Solidity</option>
-<option value="Vyper">Vyper</option>
-<option value="Move">Move</option>
-<option value="HLSL">HLSL</option>
-<option value="GLSL">GLSL</option>
-<option value="WGSL">WGSL</option>
-<option value="Nim">Nim</option>
-<option value="Crystal">Crystal</option>
-<option value="Zig">Zig</option>
-<option value="Julia">Julia</option>
-<option value="D">D</option>
-<option value="GDScript">GDScript</option>
-<option value="Prolog">Prolog</option>
-<option value="Scheme">Scheme</option>
-<option value="Common Lisp">Common Lisp</option>
-<option value="OCaml">OCaml</option>
-<option value="Racket">Racket</option>
-<option value="Dhall">Dhall</option>
-<option value="Elm">Elm</option>
-<option value="PureScript">PureScript</option>
-<option value="ReasonML">ReasonML</option>
-<option value="ReScript">ReScript</option>
-<option value="Smalltalk">Smalltalk</option>
-<option value="Tcl">Tcl</option>
-<option value="Groovy GPath">Groovy GPath</option>
-<option value="CoffeeScript">CoffeeScript</option>
-<option value="Cython">Cython</option>
-<option value="Jupyter Python">Jupyter Python</option>
-<option value="Jsonnet">Jsonnet</option>
-<option value="Starlark">Starlark</option>
-<option value="Nix">Nix</option>
-<option value="CUE">CUE</option>
-<option value="HCL">HCL</option>
-<option value="Terraform HCL">Terraform HCL</option>
-<option value="Dockerfile">Dockerfile</option>
-<option value="Makefile">Makefile</option>
-<option value="CMake">CMake</option>
-<option value="Meson">Meson</option>
-<option value="MIPS Assembly">MIPS Assembly</option>
-<option value="ARM Assembly">ARM Assembly</option>
-<option value="RISC-V Assembly">RISC-V Assembly</option>
-<option value="Verilog">Verilog</option>
-<option value="SystemVerilog">SystemVerilog</option>
-<option value="VHDL">VHDL</option>
-<option value="Vim Script">Vim Script</option>
-<option value="Emacs Lisp">Emacs Lisp</option>
-<option value="AWK">AWK</option>
-<option value="Sed">Sed</option>
-<option value="Batch">Batch</option>
-<option value="QML">QML</option>
-<option value="WebAssembly Text">WebAssembly Text</option>
-<option value="Markdown">Markdown</option>
-<option value="AsciiDoc">AsciiDoc</option>
-<option value="LaTeX">LaTeX</option>
-<option value="XML">XML</option>
-<option value="YAML">YAML</option>
-<option value="JSON">JSON</option>
-<option value="TOML">TOML</option>
-<option value="INI">INI</option>
-<option value="Diff">Diff</option>
-<option value="HTTP">HTTP</option>
-<option value="Regular Expressions">Regular Expressions</option>
-<option value="Brainfuck">Brainfuck</option>
-<option value="Protobuf">Protobuf</option>
-<option value="Thrift">Thrift</option>
-<option value="Solr">Solr</option>
-<option value="Turtle">Turtle</option>
-<option value="SPARQL">SPARQL</option>
-<option value="Cypher">Cypher</option>
-<option value="Pug">Pug</option>
-<option value="Handlebars">Handlebars</option>
-<option value="Mustache">Mustache</option>
-<option value="Liquid">Liquid</option>
-<option value="Jinja2">Jinja2</option>
-<option value="EJS">EJS</option>
-</select>
-<input id="search" class="search" type="search" placeholder="ابحث عن لغة...">
-<button class="btn primary" id="newCode"><i class="fa-solid fa-rotate-left"></i> كود تجريبي</button>
-</div>
-<div class="info"><span id="languageStatus">اللغة: HTML</span><span>124+ خيارًا</span></div>
-<div class="editor-wrap">
-<div class="editor-head"><span><i class="fa-solid fa-terminal"></i> محرر اللغة</span><button class="btn" id="saveLang"><i class="fa-solid fa-floppy-disk"></i> حفظ الكود</button></div>
-<textarea id="sourceCode"></textarea>
-</div>
-<div class="note">ملاحظة: الصفحة توفر تلوينًا وتحليلاً مناسبًا لعدد كبير من اللغات عبر CodeMirror. تشغيل كل لغة داخل المتصفح ليس ممكنًا مباشرة؛ لذلك هذه الصفحة مخصصة للتحرير والتجربة وكتابة الكود.</div>
-</main>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.8/codemirror.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.8/addon/mode/loadmode.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.8/mode/meta.min.js"></script>
+<header><div class="logo"><i class="fa-solid fa-code"></i><span>Codethd</span></div><div class="actions"><a class="btn" href="index.html"><i class="fa-solid fa-arrow-right"></i><span class="hide-mobile">العودة للمحرر</span></a><button class="btn" id="themeBtn">🌙</button></div></header>
+<main><section class="hero"><div class="hero-icon"><i class="fa-solid fa-language"></i></div><h1>اختر لغة البرمجة</h1><p>اضغط على أي لغة لفتح مساحة مستقلة خاصة بها داخل Codethd.</p></section>
+<div class="toolbar"><input id="search" class="search" type="search" placeholder="ابحث عن لغة البرمجة..."><span class="count" id="count"></span></div>
+<div class="grid" id="grid"><a class="language-card" href="language.html?lang=HTML"><div class="lang-icon"><i class="fa-brands fa-html5"></i></div><div class="lang-name">HTML</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=CSS"><div class="lang-icon"><i class="fa-brands fa-css3-alt"></i></div><div class="lang-name">CSS</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=JavaScript"><div class="lang-icon"><i class="fa-brands fa-js"></i></div><div class="lang-name">JavaScript</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=TypeScript"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">TypeScript</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=Python"><div class="lang-icon"><i class="fa-brands fa-python"></i></div><div class="lang-name">Python</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=Java"><div class="lang-icon"><i class="fa-brands fa-java"></i></div><div class="lang-name">Java</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=C"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">C</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=C%2B%2B"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">C++</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=C%23"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">C#</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=Go"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">Go</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=Rust"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">Rust</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=Kotlin"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">Kotlin</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=Swift"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">Swift</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=Dart"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">Dart</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=PHP"><div class="lang-icon"><i class="fa-brands fa-php"></i></div><div class="lang-name">PHP</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=Ruby"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">Ruby</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=R"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">R</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=MATLAB"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">MATLAB</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=Scala"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">Scala</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=Perl"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">Perl</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=Lua"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">Lua</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=Haskell"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">Haskell</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=Elixir"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">Elixir</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=Erlang"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">Erlang</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=Clojure"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">Clojure</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=Groovy"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">Groovy</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=Objective-C"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">Objective-C</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=Objective-C%2B%2B"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">Objective-C++</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=Visual%20Basic"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">Visual Basic</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=F%23"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">F#</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=Fortran"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">Fortran</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=COBOL"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">COBOL</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=Pascal"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">Pascal</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=Delphi"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">Delphi</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=Ada"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">Ada</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=Assembly"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">Assembly</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=Bash"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">Bash</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=PowerShell"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">PowerShell</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=SQL"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">SQL</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=PL%2FSQL"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">PL/SQL</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=T-SQL"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">T-SQL</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=GraphQL"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">GraphQL</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=Sass"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">Sass</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=Less"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">Less</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=SCSS"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">SCSS</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=Vue"><div class="lang-icon"><i class="fa-brands fa-vuejs"></i></div><div class="lang-name">Vue</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=Svelte"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">Svelte</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=React%20JSX"><div class="lang-icon"><i class="fa-brands fa-react"></i></div><div class="lang-name">React JSX</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=Angular%20TypeScript"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">Angular TypeScript</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=Solidity"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">Solidity</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=Vyper"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">Vyper</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=Move"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">Move</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=HLSL"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">HLSL</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=GLSL"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">GLSL</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=WGSL"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">WGSL</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=Nim"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">Nim</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=Crystal"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">Crystal</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=Zig"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">Zig</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=Julia"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">Julia</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=D"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">D</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=GDScript"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">GDScript</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=Prolog"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">Prolog</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=Scheme"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">Scheme</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=Common%20Lisp"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">Common Lisp</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=OCaml"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">OCaml</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=Racket"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">Racket</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=Dhall"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">Dhall</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=Elm"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">Elm</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=PureScript"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">PureScript</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=ReasonML"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">ReasonML</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=ReScript"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">ReScript</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=Smalltalk"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">Smalltalk</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=Tcl"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">Tcl</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=Groovy%20GPath"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">Groovy GPath</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=CoffeeScript"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">CoffeeScript</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=Cython"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">Cython</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=Jupyter%20Python"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">Jupyter Python</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=Jsonnet"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">Jsonnet</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=Starlark"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">Starlark</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=Nix"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">Nix</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=CUE"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">CUE</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=HCL"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">HCL</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=Terraform%20HCL"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">Terraform HCL</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=Dockerfile"><div class="lang-icon"><i class="fa-brands fa-docker"></i></div><div class="lang-name">Dockerfile</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=Makefile"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">Makefile</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=CMake"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">CMake</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=Meson"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">Meson</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=MIPS%20Assembly"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">MIPS Assembly</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=ARM%20Assembly"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">ARM Assembly</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=RISC-V%20Assembly"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">RISC-V Assembly</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=Verilog"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">Verilog</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=SystemVerilog"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">SystemVerilog</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=VHDL"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">VHDL</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=Vim%20Script"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">Vim Script</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=Emacs%20Lisp"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">Emacs Lisp</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=AWK"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">AWK</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=Sed"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">Sed</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=Batch"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">Batch</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=QML"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">QML</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=WebAssembly%20Text"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">WebAssembly Text</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=Markdown"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">Markdown</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=AsciiDoc"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">AsciiDoc</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=LaTeX"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">LaTeX</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=XML"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">XML</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=YAML"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">YAML</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=JSON"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">JSON</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=TOML"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">TOML</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=INI"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">INI</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=Diff"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">Diff</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=HTTP"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">HTTP</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=Regular%20Expressions"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">Regular Expressions</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=Brainfuck"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">Brainfuck</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=Protobuf"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">Protobuf</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=Thrift"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">Thrift</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=Solr"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">Solr</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=Turtle"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">Turtle</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=SPARQL"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">SPARQL</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=Cypher"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">Cypher</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=Pug"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">Pug</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=Handlebars"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">Handlebars</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=Mustache"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">Mustache</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=Liquid"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">Liquid</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=Jinja2"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">Jinja2</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a><a class="language-card" href="language.html?lang=EJS"><div class="lang-icon"><i class="fa-solid fa-code"></i></div><div class="lang-name">EJS</div><div class="lang-open">فتح <i class="fa-solid fa-arrow-left"></i></div></a></div><div class="empty" id="empty">لم يتم العثور على لغة.</div></main>
 <script>
-const select=document.getElementById('languageSelect');
-const search=document.getElementById('search');
-const status=document.getElementById('languageStatus');
-const themeBtn=document.getElementById('themeBtn');
-const defaultCode={
-HTML:'<!DOCTYPE html>\n<html>\n  <body>\n    <h1>Hello Codethd</h1>\n  </body>\n</html>',
-CSS:'body { font-family: sans-serif; }',
-JavaScript:'console.log("Hello from Codethd");',
-TypeScript:'const message: string = "Hello Codethd";',
-Python:'print("Hello Codethd")',
-Java:'public class Main { public static void main(String[] args) { System.out.println("Hello Codethd"); } }',
-C:'#include <stdio.h>\nint main(){ printf("Hello Codethd"); return 0; }',
-'C++':'#include <iostream>\nint main(){ std::cout << "Hello Codethd"; }',
-'C#':'using System;\nclass Program { static void Main(){ Console.WriteLine("Hello Codethd"); } }',
-Rust:'fn main() { println!("Hello Codethd"); }',
-Go:'package main\nimport "fmt"\nfunc main(){ fmt.Println("Hello Codethd") }',
-PHP:'<?php echo "Hello Codethd"; ?>',
-Ruby:'puts "Hello Codethd"',
-SQL:'SELECT * FROM users;',
-Bash:'echo "Hello Codethd"',
-PowerShell:'Write-Host "Hello Codethd"',
-JSON:'{\n  "name": "Codethd"\n}',
-XML:'<message>Hello Codethd</message>',
-Markdown:'# Hello Codethd\n\nWrite your notes here.',
-YAML:'name: Codethd\nversion: 1.0'
-};
-let editor=null;
-CodeMirror.modeURL='https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.8/mode/%N/%N.js';
-function findMode(name){
-  if(window.CodeMirror && Array.isArray(CodeMirror.modeInfo)){
-    return CodeMirror.findModeByName ? CodeMirror.findModeByName(name) : CodeMirror.modeInfo.find(m=>m.name.toLowerCase()===name.toLowerCase());
-  }
-  return null;
-}
-function loadLanguage(name){
-  const info=findMode(name);
-  const apply=()=>{
-    const mode=info ? (info.mime || info.mode || 'text/plain') : 'text/plain';
-    editor.setOption('mode',mode);
-    status.textContent='اللغة: '+name+(info?' — تلوين نحوي متاح':' — وضع نصي');
-    const saved=localStorage.getItem('codethd-lang-'+name);
-    editor.setValue(saved!==null?saved:(defaultCode[name]||''));
-  };
-  if(info && info.mode){
-    try{CodeMirror.autoLoadMode(editor,info.mode);setTimeout(apply,250)}catch(e){apply()}
-  }else apply();
-}
-function init(){
-  const theme=localStorage.getItem('codethd-theme')||'dark-mode';
-  document.body.classList.toggle('light',theme==='light-mode');
-  themeBtn.textContent=theme==='light-mode'?'☀️':'🌙';
-  editor=CodeMirror.fromTextArea(document.getElementById('sourceCode'),{lineNumbers:true,lineWrapping:true,indentUnit:2,indentWithTabs:false,theme:'material-darker',mode:'htmlmixed',autoCloseBrackets:true,matchBrackets:true});
-  loadLanguage(select.value);
-  select.addEventListener('change',()=>loadLanguage(select.value));
-  search.addEventListener('input',()=>{
-    const q=search.value.trim().toLowerCase();
-    [...select.options].forEach(o=>o.hidden=!!q&&!o.text.toLowerCase().includes(q));
-  });
-  document.getElementById('saveLang').addEventListener('click',()=>{
-    localStorage.setItem('codethd-lang-'+select.value,editor.getValue());
-    alert('تم حفظ الكود للغة '+select.value+' ✓');
-  });
-  document.getElementById('newCode').addEventListener('click',()=>editor.setValue(defaultCode[select.value]||''));
-  themeBtn.addEventListener('click',()=>{
-    const light=document.body.classList.contains('light');
-    document.body.classList.toggle('light',!light);
-    localStorage.setItem('codethd-theme',light?'dark-mode':'light-mode');
-    themeBtn.textContent=light?'🌙':'☀️';
-  });
-}
-document.readyState==='loading'?document.addEventListener('DOMContentLoaded',init):init();
+const search=document.getElementById('search'),count=document.getElementById('count'),grid=document.getElementById('grid'),empty=document.getElementById('empty'),themeBtn=document.getElementById('themeBtn');
+function filter(){const q=search.value.trim().toLowerCase();let shown=0;grid.querySelectorAll('.language-card').forEach(c=>{const ok=c.querySelector('.lang-name').textContent.toLowerCase().includes(q);c.style.display=ok?'block':'none';if(ok)shown++});count.textContent=shown+' لغة';empty.style.display=shown?'none':'block'}
+function theme(){const t=localStorage.getItem('codethd-theme')||'dark-mode';document.body.classList.toggle('light',t==='light-mode');themeBtn.textContent=t==='light-mode'?'☀️':'🌙'}
+grid.querySelectorAll('a').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();const href=a.href;document.body.classList.add('page-exit');setTimeout(()=>location.href=href,220)}));
+search.addEventListener('input',filter);themeBtn.addEventListener('click',()=>{const light=document.body.classList.contains('light');localStorage.setItem('codethd-theme',light?'dark-mode':'light-mode');theme()});theme();filter();
 </script>
-</body>
-</html>
+</body></html>
