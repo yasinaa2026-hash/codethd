@@ -399,6 +399,8 @@
         </div>
         <div class="header-actions">
             <a class="btn" href="projects.html" title="المشاريع"><i class="fa-solid fa-folder-open"></i> <span class="hide-mobile">المشاريع</span></a>
+            <a class="btn" href="languages.html" title="لغات البرمجة"><i class="fa-solid fa-language"></i> <span class="hide-mobile">لغات البرمجة</span></a>
+            <button class="btn" id="saveProjectBtn" title="حفظ المشروع فوراً"><i class="fa-solid fa-floppy-disk"></i> <span class="hide-mobile">حفظ</span></button>
             <button class="layout-toggle" id="layoutToggle" title="تبديل شكل التخطيط">
                 <i class="fa-solid fa-table-columns"></i>
                 <span class="hide-mobile" id="layoutText">4 أعمدة</span>
@@ -490,6 +492,7 @@
         const layoutText = document.getElementById('layoutText');
         const workspace = document.getElementById('workspace');
         const clearBtn = document.getElementById('clearBtn');
+        const saveProjectBtn = document.getElementById('saveProjectBtn');
         const exportBtn = document.getElementById('exportBtn');
         const importBtn = document.getElementById('importBtn');
         const particlesContainer = document.getElementById('particles');
@@ -701,6 +704,52 @@
             localStorage.setItem('codethd-js', jsEditor.getValue());
         }
 
+        function saveCurrentProject() {
+            const html = htmlEditor.getValue();
+            const css = cssEditor.getValue();
+            const js = jsEditor.getValue();
+
+            const projects = JSON.parse(localStorage.getItem('codethd-projects') || '[]');
+            const activeId = localStorage.getItem('codethd-active-project-id');
+            const now = new Date().toLocaleString('ar-SA');
+
+            if (activeId) {
+                const existingIndex = projects.findIndex(project => project.id === activeId);
+
+                if (existingIndex !== -1) {
+                    projects[existingIndex] = {
+                        ...projects[existingIndex],
+                        html,
+                        css,
+                        js,
+                        date: now
+                    };
+                    localStorage.setItem('codethd-projects', JSON.stringify(projects));
+                    saveCodeToLocalStorage();
+                    createParticles(18, 'sparkles');
+                    showNotification('تم حفظ المشروع وتحديثه! ✓');
+                    return;
+                }
+            }
+
+            const project = {
+                id: (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : String(Date.now()),
+                name: 'مشروع Codethd',
+                html,
+                css,
+                js,
+                date: now
+            };
+
+            projects.unshift(project);
+            localStorage.setItem('codethd-projects', JSON.stringify(projects));
+            localStorage.setItem('codethd-active-project-id', project.id);
+            saveCodeToLocalStorage();
+
+            createParticles(18, 'sparkles');
+            showNotification('تم حفظ المشروع! ✓');
+        }
+
         function loadCodeFromLocalStorage() {
             const savedHtml = localStorage.getItem('codethd-html');
             const savedCss = localStorage.getItem('codethd-css');
@@ -726,6 +775,8 @@
                 showNotification('تم مسح جميع الأكواد! 🗑️');
             }
         });
+
+        saveProjectBtn.addEventListener('click', saveCurrentProject);
 
         exportBtn.addEventListener('click', () => {
             const html = htmlEditor.getValue();
