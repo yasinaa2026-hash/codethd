@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لغات البرمجة - Codethd</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🦊</text></svg>">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/material-darker.min.css">
+<style>
+:root{--bg:#121212;--panel:#1e1e1e;--header:#181818;--text:#e0e0e0;--muted:#9ca3af;--border:#2a2a2a;--accent:#20c997;--accent2:#12b886}
+body.light{--bg:#f8f9fa;--panel:#fff;--header:#e9ecef;--text:#212529;--muted:#6c757d;--border:#dee2e6;--accent:#0ca678;--accent2:#099268}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',Tahoma,sans-serif}
+body{min-height:100vh;background:var(--bg);color:var(--text)}
+header{height:64px;background:var(--header);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:sticky;top:0;z-index:5}
+.logo{display:flex;align-items:center;gap:10px;color:var(--accent);font-size:1.2rem;font-weight:700}
+.actions{display:flex;gap:8px;align-items:center}
+.btn{display:inline-flex;align-items:center;gap:7px;text-decoration:none;background:var(--panel);color:var(--text);border:1px solid var(--border);padding:8px 13px;border-radius:7px;cursor:pointer;font-weight:600}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+main{max-width:1200px;margin:0 auto;padding:32px 18px}
+.hero{text-align:center;margin-bottom:22px}.hero i{font-size:38px;color:var(--accent);margin-bottom:10px}.hero h1{font-size:2rem;margin-bottom:6px}.hero p{color:var(--muted)}
+.toolbar{display:grid;grid-template-columns:minmax(220px,1fr) 180px auto;gap:10px;margin-bottom:14px}
+select,.search{width:100%;background:var(--panel);color:var(--text);border:1px solid var(--border);padding:10px 12px;border-radius:8px;outline:none}
+select:focus,.search:focus{border-color:var(--accent)}
+.info{display:flex;justify-content:space-between;gap:10px;color:var(--muted);font-size:.9rem;margin-bottom:10px}
+.editor-wrap{background:var(--panel);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.editor-head{height:42px;background:var(--header);display:flex;align-items:center;justify-content:space-between;padding:0 12px;border-bottom:1px solid var(--border);font-size:.9rem}
+#editor{height:62vh}.CodeMirror{height:100%;font-size:15px;font-family:Consolas,'Fira Code',monospace}
+.note{margin-top:12px;color:var(--muted);font-size:.85rem}
+@media(max-width:700px){header{padding:0 10px}.hide-mobile{display:none}.toolbar{grid-template-columns:1fr}.info{flex-direction:column}#editor{height:60vh}}
+</style>
+</head>
+<body>
+<header>
+<div class="logo"><i class="fa-solid fa-code"></i><span>Codethd</span></div>
+<div class="actions">
+<a class="btn" href="index.html"><i class="fa-solid fa-arrow-right"></i><span class="hide-mobile">العودة للمحرر</span></a>
+<button class="btn" id="themeBtn">🌙</button>
+</div>
+</header>
+<main>
+<section class="hero">
+<i class="fa-solid fa-language"></i>
+<h1>لغات البرمجة</h1>
+<p>اختر من أكثر من 100 لغة وصيغة برمجية مع تلوين نحوي عند توفر نمط CodeMirror.</p>
+</section>
+<div class="toolbar">
+<select id="languageSelect" aria-label="اختر لغة البرمجة">
+<option value="HTML">HTML</option>
+<option value="CSS">CSS</option>
+<option value="JavaScript">JavaScript</option>
+<option value="TypeScript">TypeScript</option>
+<option value="Python">Python</option>
+<option value="Java">Java</option>
+<option value="C">C</option>
+<option value="C++">C++</option>
+<option value="C#">C#</option>
+<option value="Go">Go</option>
+<option value="Rust">Rust</option>
+<option value="Kotlin">Kotlin</option>
+<option value="Swift">Swift</option>
+<option value="Dart">Dart</option>
+<option value="PHP">PHP</option>
+<option value="Ruby">Ruby</option>
+<option value="R">R</option>
+<option value="MATLAB">MATLAB</option>
+<option value="Scala">Scala</option>
+<option value="Perl">Perl</option>
+<option value="Lua">Lua</option>
+<option value="Haskell">Haskell</option>
+<option value="Elixir">Elixir</option>
+<option value="Erlang">Erlang</option>
+<option value="Clojure">Clojure</option>
+<option value="Groovy">Groovy</option>
+<option value="Objective-C">Objective-C</option>
+<option value="Objective-C++">Objective-C++</option>
+<option value="Visual Basic">Visual Basic</option>
+<option value="F#">F#</option>
+<option value="Fortran">Fortran</option>
+<option value="COBOL">COBOL</option>
+<option value="Pascal">Pascal</option>
+<option value="Delphi">Delphi</option>
+<option value="Ada">Ada</option>
+<option value="Assembly">Assembly</option>
+<option value="Bash">Bash</option>
+<option value="PowerShell">PowerShell</option>
+<option value="SQL">SQL</option>
+<option value="PL/SQL">PL/SQL</option>
+<option value="T-SQL">T-SQL</option>
+<option value="GraphQL">GraphQL</option>
+<option value="Sass">Sass</option>
+<option value="Less">Less</option>
+<option value="SCSS">SCSS</option>
+<option value="Vue">Vue</option>
+<option value="Svelte">Svelte</option>
+<option value="React JSX">React JSX</option>
+<option value="Angular TypeScript">Angular TypeScript</option>
+<option value="Solidity">Solidity</option>
+<option value="Vyper">Vyper</option>
+<option value="Move">Move</option>
+<option value="HLSL">HLSL</option>
+<option value="GLSL">GLSL</option>
+<option value="WGSL">WGSL</option>
+<option value="Nim">Nim</option>
+<option value="Crystal">Crystal</option>
+<option value="Zig">Zig</option>
+<option value="Julia">Julia</option>
+<option value="D">D</option>
+<option value="GDScript">GDScript</option>
+<option value="Prolog">Prolog</option>
+<option value="Scheme">Scheme</option>
+<option value="Common Lisp">Common Lisp</option>
+<option value="OCaml">OCaml</option>
+<option value="Racket">Racket</option>
+<option value="Dhall">Dhall</option>
+<option value="Elm">Elm</option>
+<option value="PureScript">PureScript</option>
+<option value="ReasonML">ReasonML</option>
+<option value="ReScript">ReScript</option>
+<option value="Smalltalk">Smalltalk</option>
+<option value="Tcl">Tcl</option>
+<option value="Groovy GPath">Groovy GPath</option>
+<option value="CoffeeScript">CoffeeScript</option>
+<option value="Cython">Cython</option>
+<option value="Jupyter Python">Jupyter Python</option>
+<option value="Jsonnet">Jsonnet</option>
+<option value="Starlark">Starlark</option>
+<option value="Nix">Nix</option>
+<option value="CUE">CUE</option>
+<option value="HCL">HCL</option>
+<option value="Terraform HCL">Terraform HCL</option>
+<option value="Dockerfile">Dockerfile</option>
+<option value="Makefile">Makefile</option>
+<option value="CMake">CMake</option>
+<option value="Meson">Meson</option>
+<option value="MIPS Assembly">MIPS Assembly</option>
+<option value="ARM Assembly">ARM Assembly</option>
+<option value="RISC-V Assembly">RISC-V Assembly</option>
+<option value="Verilog">Verilog</option>
+<option value="SystemVerilog">SystemVerilog</option>
+<option value="VHDL">VHDL</option>
+<option value="Vim Script">Vim Script</option>
+<option value="Emacs Lisp">Emacs Lisp</option>
+<option value="AWK">AWK</option>
+<option value="Sed">Sed</option>
+<option value="Batch">Batch</option>
+<option value="QML">QML</option>
+<option value="WebAssembly Text">WebAssembly Text</option>
+<option value="Markdown">Markdown</option>
+<option value="AsciiDoc">AsciiDoc</option>
+<option value="LaTeX">LaTeX</option>
+<option value="XML">XML</option>
+<option value="YAML">YAML</option>
+<option value="JSON">JSON</option>
+<option value="TOML">TOML</option>
+<option value="INI">INI</option>
+<option value="Diff">Diff</option>
+<option value="HTTP">HTTP</option>
+<option value="Regular Expressions">Regular Expressions</option>
+<option value="Brainfuck">Brainfuck</option>
+<option value="Protobuf">Protobuf</option>
+<option value="Thrift">Thrift</option>
+<option value="Solr">Solr</option>
+<option value="Turtle">Turtle</option>
+<option value="SPARQL">SPARQL</option>
+<option value="Cypher">Cypher</option>
+<option value="Pug">Pug</option>
+<option value="Handlebars">Handlebars</option>
+<option value="Mustache">Mustache</option>
+<option value="Liquid">Liquid</option>
+<option value="Jinja2">Jinja2</option>
+<option value="EJS">EJS</option>
+</select>
+<input id="search" class="search" type="search" placeholder="ابحث عن لغة...">
+<button class="btn primary" id="newCode"><i class="fa-solid fa-rotate-left"></i> كود تجريبي</button>
+</div>
+<div class="info"><span id="languageStatus">اللغة: HTML</span><span>124+ خيارًا</span></div>
+<div class="editor-wrap">
+<div class="editor-head"><span><i class="fa-solid fa-terminal"></i> محرر اللغة</span><button class="btn" id="saveLang"><i class="fa-solid fa-floppy-disk"></i> حفظ الكود</button></div>
+<textarea id="sourceCode"></textarea>
+</div>
+<div class="note">ملاحظة: الصفحة توفر تلوينًا وتحليلاً مناسبًا لعدد كبير من اللغات عبر CodeMirror. تشغيل كل لغة داخل المتصفح ليس ممكنًا مباشرة؛ لذلك هذه الصفحة مخصصة للتحرير والتجربة وكتابة الكود.</div>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/mode/loadmode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/meta.min.js"></script>
+<script>
+const select=document.getElementById('languageSelect');
+const search=document.getElementById('search');
+const status=document.getElementById('languageStatus');
+const themeBtn=document.getElementById('themeBtn');
+const defaultCode={
+HTML:'<!DOCTYPE html>\n<html>\n  <body>\n    <h1>Hello Codethd</h1>\n  </body>\n</html>',
+CSS:'body { font-family: sans-serif; }',
+JavaScript:'console.log("Hello from Codethd");',
+TypeScript:'const message: string = "Hello Codethd";',
+Python:'print("Hello Codethd")',
+Java:'public class Main { public static void main(String[] args) { System.out.println("Hello Codethd"); } }',
+C:'#include <stdio.h>\nint main(){ printf("Hello Codethd"); return 0; }',
+'C++':'#include <iostream>\nint main(){ std::cout << "Hello Codethd"; }',
+CSharp:'using System;\nclass Program { static void Main(){ Console.WriteLine("Hello Codethd"); } }',
+Rust:'fn main() { println!("Hello Codethd"); }',
+Go:'package main\nimport "fmt"\nfunc main(){ fmt.Println("Hello Codethd") }',
+PHP:'<?php echo "Hello Codethd"; ?>',
+Ruby:'puts "Hello Codethd"',
+SQL:'SELECT * FROM users;',
+Bash:'echo "Hello Codethd"',
+PowerShell:'Write-Host "Hello Codethd"',
+JSON:'{\n  "name": "Codethd"\n}',
+XML:'<message>Hello Codethd</message>',
+Markdown:'# Hello Codethd\n\nWrite your notes here.',
+YAML:'name: Codethd\nversion: 1.0'
+};
+let editor=null;
+CodeMirror.modeURL='https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/%N/%N.js';
+function findMode(name){
+  if(window.CodeMirror && Array.isArray(CodeMirror.modeInfo)){
+    return CodeMirror.findModeByName ? CodeMirror.findModeByName(name) : CodeMirror.modeInfo.find(m=>m.name.toLowerCase()===name.toLowerCase());
+  }
+  return null;
+}
+function loadLanguage(name){
+  const info=findMode(name);
+  const apply=()=>{
+    const mode=info ? (info.mime || info.mode || 'text/plain') : 'text/plain';
+    editor.setOption('mode',mode);
+    status.textContent='اللغة: '+name+(info?' — تلوين نحوي متاح':' — وضع نصي');
+    const saved=localStorage.getItem('codethd-lang-'+name);
+    editor.setValue(saved!==null?saved:(defaultCode[name]||''));
+  };
+  if(info && info.mode){
+    try{CodeMirror.autoLoadMode(editor,info.mode);setTimeout(apply,250)}catch(e){apply()}
+  }else apply();
+}
+function init(){
+  const theme=localStorage.getItem('codethd-theme')||'dark-mode';
+  document.body.classList.toggle('light',theme==='light-mode');
+  themeBtn.textContent=theme==='light-mode'?'☀️':'🌙';
+  editor=CodeMirror.fromTextArea(document.getElementById('sourceCode'),{lineNumbers:true,lineWrapping:true,indentUnit:2,indentWithTabs:false,theme:'material-darker',mode:'htmlmixed',autoCloseBrackets:true,matchBrackets:true});
+  loadLanguage(select.value);
+  select.addEventListener('change',()=>loadLanguage(select.value));
+  search.addEventListener('input',()=>{
+    const q=search.value.trim().toLowerCase();
+    [...select.options].forEach(o=>o.hidden=!!q&&!o.text.toLowerCase().includes(q));
+  });
+  document.getElementById('saveLang').addEventListener('click',()=>{
+    localStorage.setItem('codethd-lang-'+select.value,editor.getValue());
+    alert('تم حفظ الكود للغة '+select.value+' ✓');
+  });
+  document.getElementById('newCode').addEventListener('click',()=>editor.setValue(defaultCode[select.value]||''));
+  themeBtn.addEventListener('click',()=>{
+    const light=document.body.classList.contains('light');
+    document.body.classList.toggle('light',!light);
+    localStorage.setItem('codethd-theme',light?'dark-mode':'light-mode');
+    themeBtn.textContent=light?'🌙':'☀️';
+  });
+}
+document.readyState==='loading'?document.addEventListener('DOMContentLoaded',init):init();
+</script>
+</body>
+</html>
