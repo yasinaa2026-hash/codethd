@@ -18,22 +18,23 @@
     if(m.includes('email')&&m.includes('confirm')) return 'تأكيد البريد الإلكتروني مفعّل في إعدادات الحساب. عطّله ليعمل دخول Codethd بدون بريد.';
     return e?.message||'حدث خطأ غير متوقع.';
   };
-  async function session(){const r=await client.auth.getSession();if(r.error)throw r.error;return r.data.session||null}
+  const withTimeout=(promise,ms=12000,label='الطلب')=>Promise.race([promise,new Promise((_,reject)=>setTimeout(()=>reject(new Error(label+' استغرق وقتًا طويلًا. تحقق من الاتصال ثم جرّب مرة أخرى.')),ms))]);
+  async function session(){const r=await withTimeout(client.auth.getSession(),12000,'فحص الجلسة');if(r.error)throw r.error;return r.data.session||null}
   async function profile(userId){const r=await client.from('profiles').select('id,username,display_name,bio,avatar_url,created_at').eq('id',userId).maybeSingle();if(r.error)throw r.error;return r.data||null}
   async function signUp(username,password,displayName){
     const u=cleanUsername(username); if(!usernameOk(u)) throw new Error('اسم المستخدم يجب أن يكون 3-24 حرفًا بالإنجليزية أو أرقام أو _.');
     if(!passwordOk(password)) throw new Error('كلمة المرور يجب أن تكون 8 أحرف على الأقل.');
     const email=emailForUsername(u);
-    const r=await client.auth.signUp({email,password,options:{data:{username:u,display_name:(displayName||u).trim()}}});
+    const r=await withTimeout(client.auth.signUp({email,password,options:{data:{username:u,display_name:(displayName||u).trim()}}}),12000,'إنشاء الحساب');
     if(r.error)throw r.error;
     if(!r.data.session) throw new Error('تم إنشاء الحساب، لكن تأكيد البريد مفعّل. عطّل Confirm email في إعدادات Authentication.');
-    const p=await profile(r.data.user.id);
+    const p=await withTimeout(profile(r.data.user.id),12000,'تحميل الحساب');
     return {session:r.data.session,profile:p};
   }
   async function signIn(username,password){
     const u=cleanUsername(username); if(!usernameOk(u)) throw new Error('اسم المستخدم غير صالح.');
     if(!passwordOk(password)) throw new Error('كلمة المرور يجب أن تكون 8 أحرف على الأقل.');
-    const r=await client.auth.signInWithPassword({email:emailForUsername(u),password});
+    const r=await withTimeout(client.auth.signInWithPassword({email:emailForUsername(u),password}),12000,'تسجيل الدخول');
     if(r.error)throw r.error;
     return {session:r.data.session,profile:await profile(r.data.user.id)};
   }
