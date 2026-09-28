@@ -5,7 +5,6 @@
 <title>أصدقاء Codethd</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🦊</text></svg>">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{--bg:#121212;--panel:#1e1e1e;--header:#181818;--text:#e0e0e0;--muted:#9ca3af;--border:#2a2a2a;--accent:#20c997;--hover:#12b886}
 body.light{--bg:#f8f9fa;--panel:#fff;--header:#e9ecef;--text:#212529;--muted:#6c757d;--border:#dee2e6;--accent:#0ca678;--hover:#099268}
@@ -23,66 +22,44 @@ main{max-width:1120px;margin:0 auto;padding:32px 20px 60px}.hero{text-align:cent
 <body>
 <header><div class="logo"><i class="fa-solid fa-code"></i><span>Codethd</span></div><div class="actions"><a class="btn" href="index.html"><i class="fa-solid fa-arrow-right"></i><span class="hide-mobile">المحرر</span></a><a class="btn" href="projects.html"><i class="fa-solid fa-folder-open"></i><span class="hide-mobile">مشاريعي</span></a><button class="btn" id="theme">🌙</button></div></header>
 <main>
-<section class="hero"><div class="hero-icon"><i class="fa-solid fa-user-group"></i></div><h1>أصدقاء Codethd</h1><p>ابحث عن أعضاء Codethd بالاسم، افتح ملفهم، وشاهد مشاريعهم وتابعهم.</p></section>
-<div class="search"><input id="q" placeholder="ابحث باسم المستخدم أو الاسم الظاهر..." autocomplete="off"><button id="searchBtn" class="btn primary"><i class="fa-solid fa-search"></i> بحث</button></div>
+<section class="hero"><div class="hero-icon"><i class="fa-solid fa-user-group"></i></div><h1>مجتمع Codethd</h1><p>ابحث عن أصحابك داخل Codethd، شاهد ملفاتهم ومشاريعهم وتابعهم.</p></section>
+<div class="search"><input id="q" placeholder="ابحث باسم المستخدم أو الاسم..." autocomplete="off"><button id="searchBtn" class="btn primary"><i class="fa-solid fa-search"></i> بحث</button></div>
 <div id="status" class="status"></div><section id="profile" class="profile"></section><section id="results" class="results"></section>
 </main>
-<script src="supabase-config.js?v=20260928"></script>
+<script src="codethd-local.js?v=20260928.1"></script>
 <script>
-(async function(){
-const U=window.CODETHD_SUPABASE_URL,K=window.CODETHD_SUPABASE_KEY;
-if(!U||!K){document.getElementById('status').textContent='اربط Supabase أولًا من supabase-config.js';return}
-const supabase=window.supabase.createClient(U,K),$=id=>document.getElementById(id);
-const {data:{session}}=await supabase.auth.getSession();if(!session){location.href='auth.html';return}
-const me=session.user.id;
-function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
-function followState(){return supabase.from('follows').select('following_id').eq('follower_id',me)}
-async function renderUsers(userRows, projectRows, ownerMap){
-  const {data:following=[]}=await followState();
-  const ids=new Set(following.map(x=>x.following_id));
-  const usersHtml=userRows.length?'<div style="grid-column:1/-1;font-weight:800;margin-top:4px">👤 المستخدمون</div>'+userRows.map(u=>'<article class="card"><div class="user"><img class="avatar" src="'+esc(u.avatar_url||'')+'" alt=""><div class="user-info"><div class="name"><strong>'+esc(u.display_name||u.username)+'</strong><span class="username">@'+esc(u.username)+'</span></div><div class="bio">'+esc(u.bio||'عضو في Codethd')+'</div><div class="meta"><span><i class="fa-solid fa-user"></i> عضو</span></div><div class="actions2"><button class="btn primary profileBtn" data-id="'+u.id+'"><i class="fa-solid fa-user"></i> الملف</button><button class="btn '+(ids.has(u.id)?'following':'')+' followBtn" data-id="'+u.id+'"><i class="fa-solid fa-'+(ids.has(u.id)?'check':'plus')+'"></i> '+(ids.has(u.id)?'متابَع':'متابعة')+'</button></div></div></div></article>').join(''):'';
-  const projectsHtml=projectRows.length?'<div style="grid-column:1/-1;font-weight:800;margin-top:10px">📁 المشاريع</div>'+projectRows.map(p=>{const o=ownerMap[p.user_id]||{};return '<article class="card"><div class="topRow" style="display:flex;justify-content:space-between;gap:10px"><div><h3 style="margin-bottom:4px">'+esc(p.name)+'</h3><div class="username">بواسطة @'+esc(o.username||'مستخدم')+'</div></div><div class="iconBox" style="width:42px;height:42px;border-radius:10px;background:rgba(32,201,151,.1);color:var(--accent);display:grid;place-items:center"><i class="fa-solid fa-code"></i></div></div><p class="bio">مشروع منشور داخل Codethd</p><div class="actions2"><button class="btn primary openProject" data-id="'+p.id+'"><i class="fa-solid fa-eye"></i> مشاهدة المشروع</button>'+(o.id?'<button class="btn profileBtn" data-id="'+o.id+'"><i class="fa-solid fa-user"></i> صاحب المشروع</button>':'')+'</div></article>'}).join(''):'';
-  $('results').innerHTML=usersHtml+projectsHtml || '<div class="empty"><i class="fa-regular fa-face-frown"></i><h2>لا توجد نتائج</h2><p>جرّب اسم مستخدم أو اسم مشروع مختلف.</p></div>';
-  bind();
-}
-function bind(){
-  document.querySelectorAll('.profileBtn').forEach(b=>b.onclick=()=>openProfile(b.dataset.id));
-  document.querySelectorAll('.followBtn').forEach(b=>b.onclick=async()=>{b.disabled=true;await toggleFollow(b.dataset.id);search()});
-  document.querySelectorAll('.openProject').forEach(b=>b.onclick=()=>openProject(b.dataset.id));
-}
-async function toggleFollow(id){
-  if(id===me)return;
-  const {data}=await supabase.from('follows').select('following_id').eq('follower_id',me).eq('following_id',id).maybeSingle();
-  if(data) await supabase.from('follows').delete().eq('follower_id',me).eq('following_id',id);
-  else await supabase.from('follows').insert({follower_id:me,following_id:id});
-}
-async function search(){
-  const q=$('q').value.trim();
-  $('profile').classList.remove('show');
-  if(!q){$('results').innerHTML='';$('status').textContent='اكتب اسم المستخدم أو اسم المشروع للبحث.';return}
-  $('status').textContent='جارٍ البحث...';$('results').innerHTML='';
-  const pattern='%'+q+'%';
-  const [u1,u2,pr]=await Promise.all([
-    supabase.from('profiles').select('id,username,display_name,bio,avatar_url').ilike('username_norm',pattern).neq('id',me).limit(20),
-    supabase.from('profiles').select('id,username,display_name,bio,avatar_url').ilike('display_name',pattern).neq('id',me).limit(20),
-    supabase.from('projects').select('id,name,updated_at,user_id').ilike('name',pattern).limit(30)
-  ]);
-  const errors=[u1.error,u2.error,pr.error].filter(Boolean);
-  if(errors.length){$('status').textContent='تعذر تنفيذ البحث: '+errors[0].message;return}
-  const map=new Map();
-  [...(u1.data||[]),...(u2.data||[])].forEach(u=>map.set(u.id,u));
-  const users=[...map.values()];
-  const projects=pr.data||[];
-  const ownerIds=[...new Set(projects.map(p=>p.user_id).filter(Boolean))];
-  const {data:owners,error:ownerError}=ownerIds.length?await supabase.from('profiles').select('id,username,display_name,avatar_url').in('id',ownerIds):{data:[],error:null};
-  if(ownerError){$('status').textContent='تعذر تحميل أصحاب المشاريع: '+ownerError.message;return}
-  const ownerMap=Object.fromEntries((owners||[]).map(o=>[o.id,o]));
-  $('status').textContent=(users.length+projects.length)+' نتيجة';
-  renderUsers(users,projects,ownerMap);
-}
-$('searchBtn').onclick=search;$('q').onkeydown=e=>{if(e.key==='Enter')search()};
-$('theme').onclick=()=>{const light=document.body.classList.toggle('light');localStorage.setItem('codethd-theme',light?'light-mode':'dark-mode');$('theme').textContent=light?'☀️':'🌙'};
-const t=localStorage.getItem('codethd-theme')||'dark-mode';document.body.classList.toggle('light',t==='light-mode');$('theme').textContent=t==='light-mode'?'☀️':'🌙';
+(function(){
+  const $=id=>document.getElementById(id);
+  const me=CodeTHD.ensure();
+  function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
+  function bind(){
+    document.querySelectorAll('.profileBtn').forEach(b=>b.onclick=()=>openProfile(b.dataset.id));
+    document.querySelectorAll('.followBtn').forEach(b=>b.onclick=()=>{CodeTHD.toggleFollow(b.dataset.id);search()});
+    document.querySelectorAll('.openProject').forEach(b=>b.onclick=()=>{localStorage.setItem('codethd-view-project-id',b.dataset.id);location.href='projects.html'});
+  }
+  function openProfile(id){
+    const u=CodeTHD.getProfile(id); if(!u)return;
+    const ps=CodeTHD.getProjects(id), follow=CodeTHD.isFollowing(id);
+    $('profile').classList.add('show');
+    $('profile').innerHTML='<div class="profile-head"><div class="profile-avatar" style="display:grid;place-items:center;background:rgba(32,201,151,.1);color:var(--accent);font-size:32px"><i class="fa-solid fa-user"></i></div><div class="profile-body"><div class="profile-top"><div><h2>'+esc(u.displayName||u.username)+'</h2><div class="username">@'+esc(u.username)+'</div></div><button class="btn '+(follow?'following':'primary')+'" id="profileFollow">'+(follow?'✓ متابَع':'＋ متابعة')+'</button></div><p>'+esc(u.bio)+'</p><div class="pmeta"><span>📁 '+ps.length+' مشاريع</span><span>👥 '+CodeTHD.following().filter(x=>x.id===u.id).length+' متابعة عندك</span></div></div></div><div class="section"><h3>مشاريع '+esc(u.displayName||u.username)+'</h3><div class="projects">'+(ps.length?ps.map(p=>'<article class="project"><h4>'+esc(p.name)+'</h4><p>مشروع منشور داخل Codethd</p><button class="btn primary openProject" data-id="'+p.id+'"><i class="fa-solid fa-eye"></i> مشاهدة</button></article>').join(''):'<div class="empty"><i class="fa-regular fa-folder-open"></i><p>لا توجد مشاريع بعد.</p></div>')+'</div></div>';
+    $('profileFollow').onclick=()=>{CodeTHD.toggleFollow(id);openProfile(id);search()};
+    $('profile').querySelectorAll('.openProject').forEach(b=>b.onclick=()=>{localStorage.setItem('codethd-view-project-id',b.dataset.id);location.href='projects.html'});
+    $('profile').scrollIntoView({behavior:'smooth',block:'start'});
+  }
+  function search(){
+    const q=$('q').value.trim();
+    const users=CodeTHD.getUsers(q), projects=CodeTHD.searchProjects(q).filter(p=>p.userId!==me.id);
+    const ownerMap=Object.fromEntries(projects.map(p=>[p.userId,CodeTHD.getProfile(p.userId)]));
+    $('status').textContent=q ? ((users.length+projects.length)+' نتيجة') : 'اكتب اسم المستخدم أو اسم المشروع للبحث.';
+    if(!q){$('results').innerHTML='';return}
+    const uh=users.map(u=>'<article class="card"><div class="user"><div class="avatar" style="display:grid;place-items:center;font-size:23px">👤</div><div class="user-info"><div class="name"><strong>'+esc(u.displayName)+'</strong><span class="username">@'+esc(u.username)+'</span></div><div class="bio">'+esc(u.bio)+'</div><div class="actions2"><button class="btn primary profileBtn" data-id="'+u.id+'">الملف</button><button class="btn '+(CodeTHD.isFollowing(u.id)?'following':'')+' followBtn" data-id="'+u.id+'">'+(CodeTHD.isFollowing(u.id)?'✓ متابَع':'＋ متابعة')+'</button></div></div></div></article>').join('');
+    const ph=projects.map(p=>{const o=ownerMap[p.userId]||{};return '<article class="card"><h3>'+esc(p.name)+'</h3><div class="username">بواسطة @'+esc(o.username||'مستخدم')+'</div><div class="actions2"><button class="btn primary openProject" data-id="'+p.id+'">مشاهدة المشروع</button><button class="btn profileBtn" data-id="'+(o.id||'')+'">صاحب المشروع</button></div></article>'}).join('');
+    $('results').innerHTML=(uh||ph)?uh+ph:'<div class="empty" style="grid-column:1/-1"><i class="fa-regular fa-face-frown"></i><h2>لا توجد نتائج</h2><p>جرّب اسمًا مختلفًا.</p></div>';
+    bind();
+  }
+  $('searchBtn').onclick=search;$('q').onkeydown=e=>{if(e.key==='Enter')search()};
+  $('theme').onclick=()=>{const light=document.body.classList.toggle('light');localStorage.setItem('codethd-theme',light?'light-mode':'dark-mode');$('theme').textContent=light?'☀️':'🌙'};
+  const t=localStorage.getItem('codethd-theme')||'dark-mode';document.body.classList.toggle('light',t==='light-mode');$('theme').textContent=t==='light-mode'?'☀️':'🌙';
 })();
 </script>
 </body>
