@@ -710,12 +710,17 @@
             const js = jsEditor.getValue();
             const activeId = localStorage.getItem('codethd-active-project-id');
             try {
+                const state = await window.CODETHD_AUTH_READY;
+                await saveCodeToLocalStorage();
+                if (!state) {
+                    createParticles(12, 'sparkles');
+                    showNotification('تم حفظ الكود على هذا الجهاز ✓');
+                    return;
+                }
                 const result = await CodeTHDCloud.saveProject(activeId,{name:'مشروع Codethd',html,css,js});
                 localStorage.setItem('codethd-active-project-id',result.id);
-                await saveCodeToLocalStorage();
                 createParticles(18, 'sparkles');
-                const me = await CodeTHDCloud.ensureSession();
-                showNotification('تم حفظ المشروع في حساب @'+(me?.profile?.username||'ك')+' ✓');
+                showNotification('تم حفظ المشروع في حساب @'+(state.profile?.username||'ك')+' ✓');
             } catch (e) {
                 console.error(e);
                 showNotification('تعذر حفظ المشروع: '+CodeTHDCloud.errorText(e));
@@ -726,10 +731,10 @@
             let loaded = false;
             const activeId = localStorage.getItem('codethd-active-project-id');
             try {
-                if (activeId) {
+                const state = await window.CODETHD_AUTH_READY;
+                if (state && activeId) {
                     const data = await CodeTHDCloud.project(activeId);
-                    const me = await CodeTHDCloud.ensureSession();
-                    if (data && me && data.user_id === me.session.user.id) {
+                    if (data && data.user_id === state.session.user.id) {
                         htmlEditor.setValue(data.html || '');
                         cssEditor.setValue(data.css || '');
                         jsEditor.setValue(data.js || '');
@@ -994,6 +999,7 @@
 
         async function initApp() {
             const state = await window.CODETHD_AUTH_READY;
+            window.CODETHD_AUTH_STATE = state;
             initTheme();
             initLayout();
             const userBtn=document.getElementById('authUserBtn');
