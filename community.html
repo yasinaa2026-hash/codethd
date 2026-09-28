@@ -36,50 +36,51 @@ main{max-width:1120px;margin:0 auto;padding:32px 20px 60px}.hero{text-align:cent
   if(!state){location.href='auth.html';return}
   const me=state.profile;
   const gradients=[
-    'linear-gradient(135deg,#20c997,#0f766e,#111827)',
-    'linear-gradient(135deg,#6366f1,#8b5cf6,#ec4899)',
-    'linear-gradient(135deg,#0ea5e9,#06b6d4,#14b8a6)',
-    'linear-gradient(135deg,#f59e0b,#ef4444,#be185d)',
-    'linear-gradient(135deg,#111827,#334155,#0f172a)',
-    'linear-gradient(135deg,#22c55e,#84cc16,#15803d)'
+    'linear-gradient(135deg,#20c997,#0f766e,#111827)','linear-gradient(135deg,#6366f1,#8b5cf6,#ec4899)',
+    'linear-gradient(135deg,#0ea5e9,#06b6d4,#14b8a6)','linear-gradient(135deg,#f59e0b,#ef4444,#be185d)',
+    'linear-gradient(135deg,#111827,#334155,#0f172a)','linear-gradient(135deg,#22c55e,#84cc16,#15803d)',
+    'linear-gradient(135deg,#14b8a6,#2563eb,#7c3aed)','linear-gradient(135deg,#f43f5e,#fb7185,#f59e0b)'
   ];
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
-  async function personCard(u){
-    const following=await CodeTHDCloud.isFollowing(u.id);
-    const st=await CodeTHDCloud.stats(u.id);
-    const bg=u.background||gradients[0];
-    return '<article class="card" style="background:'+esc(bg)+';background-size:cover"><div style="margin:-16px;padding:16px;background:rgba(0,0,0,.28);min-height:170px"><div class="user"><div class="avatar" style="display:grid;place-items:center;background:rgba(255,255,255,.17);color:#fff;border-color:rgba(255,255,255,.3);font-size:24px">👤</div><div class="user-info"><div class="name"><strong style="color:#fff">'+esc(u.display_name||u.username)+'</strong><span class="username" style="color:rgba(255,255,255,.72)">@'+esc(u.username)+'</span></div><div class="bio" style="color:rgba(255,255,255,.84)">'+esc(u.bio||'عضو جديد في Codethd ✨')+'</div><div class="meta" style="color:rgba(255,255,255,.72)"><span>📁 '+st.projects+'</span><span>👥 '+st.followers+'</span></div></div></div><div class="actions2"><button class="btn primary profileBtn" data-id="'+u.id+'">الملف</button><button class="btn '+(following?'following':'')+' followBtn" data-id="'+u.id+'">'+(following?'✓ متابَع':'＋ متابعة')+'</button></div></div></article>';
+  const getBg=u=>{
+    if(u.id===me.id){const saved=localStorage.getItem('codethd-profile-bg');if(saved)return saved}
+    let h=0;for(const ch of String(u.username||u.id)){h=((h<<5)-h)+ch.charCodeAt(0);h|=0}
+    return gradients[Math.abs(h)%gradients.length];
+  };
+  async function card(u,followedIds){
+    const following=followedIds.has(u.id),bg=getBg(u);
+    return '<article class="card" style="background:'+esc(bg)+';background-size:cover"><div style="margin:-16px;padding:16px;background:linear-gradient(to bottom,rgba(0,0,0,.12),rgba(0,0,0,.54));min-height:166px"><div class="user"><div class="avatar" style="display:grid;place-items:center;background:rgba(255,255,255,.17);color:#fff;border-color:rgba(255,255,255,.3);font-size:24px">👤</div><div class="user-info"><div class="name"><strong style="color:#fff">'+esc(u.display_name||u.username)+'</strong><span class="username" style="color:rgba(255,255,255,.76)">@'+esc(u.username)+'</span></div><div class="bio" style="color:rgba(255,255,255,.87)">'+esc(u.bio||'عضو في Codethd ✨')+'</div></div></div><div class="actions2"><button class="btn primary profileBtn" data-id="'+u.id+'">👤 الملف</button><button class="btn '+(following?'following':'')+' followBtn" data-id="'+u.id+'">'+(following?'✓ متابَع':'＋ متابعة')+'</button></div></div></article>';
   }
   async function openProfile(id){
-    const u=id===me.id?me:await CodeTHDCloud.profile(id);if(!u)return;
-    const [ps,st,following]=await Promise.all([CodeTHDCloud.peopleProjects('').then(async all=>all.filter(p=>p.user_id===id)),CodeTHDCloud.stats(id),id===me.id?false:CodeTHDCloud.isFollowing(id)]);
-    const own=id===me.id, bg=u.background||gradients[0];
+    const u=await CodeTHDCloud.profile(id);if(!u)return;
+    const [ps,st,following]=await Promise.all([CodeTHDCloud.userProjects(id),CodeTHDCloud.stats(id),id===me.id?false:CodeTHDCloud.isFollowing(id)]);
+    const own=id===me.id,bg=getBg(u);
     $('profile').classList.add('show');$('profile').style.background=bg;
-    $('profile').innerHTML='<div style="background:rgba(0,0,0,.34);padding:18px;border-radius:12px"><div class="profile-head"><div class="profile-avatar" style="display:grid;place-items:center;background:rgba(255,255,255,.16);color:#fff;font-size:33px;border-color:rgba(255,255,255,.35)">👤</div><div class="profile-body"><div class="profile-top"><div><h2 style="color:#fff">'+esc(u.display_name||u.username)+'</h2><div class="username" style="color:rgba(255,255,255,.74)">@'+esc(u.username)+'</div></div>'+(own?'':'<button class="btn '+(following?'following':'primary')+'" id="profileFollow">'+(following?'✓ متابَع':'＋ متابعة')+'</button>')+'</div><p style="color:rgba(255,255,255,.84)">'+esc(u.bio||'عضو في Codethd')+'</p><div class="pmeta" style="color:rgba(255,255,255,.75)"><span>📁 '+st.projects+' مشاريع</span><span>👥 '+st.followers+' متابع</span><span>➜ '+st.following+' يتابع</span></div></div></div>'+
-    (own?'<div class="section"><h3 style="color:#fff">🎨 خلفية ملفك</h3><div style="display:flex;gap:8px;flex-wrap:wrap">'+gradients.map((g,i)=>'<button class="bgChoice" data-bg="'+esc(g)+'" style="width:52px;height:38px;border-radius:10px;border:2px solid '+(u.background===g?'#fff':'rgba(255,255,255,.35)')+';background:'+esc(g)+';cursor:pointer" aria-label="الخلفية '+(i+1)+'"></button>').join('')+'</div></div>':'')+
-    '<div class="section"><h3 style="color:#fff">📁 المشاريع</h3><div class="projects">'+(ps.length?ps.map(p=>'<article class="project" style="background:rgba(0,0,0,.2);border-color:rgba(255,255,255,.18);color:#fff"><h4>'+esc(p.name)+'</h4><p style="color:rgba(255,255,255,.75)">مشروع منشور داخل Codethd</p><button class="btn primary openProject" data-id="'+p.id+'">مشاهدة المشروع</button></article>').join(''):'<div class="empty" style="background:rgba(0,0,0,.18);border-color:rgba(255,255,255,.2);color:#fff"><p style="color:rgba(255,255,255,.8)">لا توجد مشاريع منشورة بعد.</p></div>')+'</div></div></div>';
-    if($('profileFollow'))$('profileFollow').onclick=async()=>{await CodeTHDCloud.toggleFollow(id);openProfile(id);render()};
-    document.querySelectorAll('.bgChoice').forEach(b=>b.onclick=async()=>{await CodeTHDCloud.updateProfile({background:b.dataset.bg});const fresh=await CodeTHDCloud.profile(me.id);Object.assign(me,fresh||{});openProfile(me.id);});
+    $('profile').innerHTML='<div style="background:rgba(0,0,0,.35);padding:19px;border-radius:12px"><div class="profile-head"><div class="profile-avatar" style="display:grid;place-items:center;background:rgba(255,255,255,.18);color:#fff;font-size:34px;border-color:rgba(255,255,255,.35)">👤</div><div class="profile-body"><div class="profile-top"><div><h2 style="color:#fff">'+esc(u.display_name||u.username)+'</h2><div class="username" style="color:rgba(255,255,255,.75)">@'+esc(u.username)+'</div></div>'+(own?'':'<button class="btn '+(following?'following':'primary')+'" id="profileFollow">'+(following?'✓ متابَع':'＋ متابعة')+'</button>')+'</div><p style="color:rgba(255,255,255,.86)">'+esc(u.bio||'عضو في Codethd')+'</p><div class="pmeta" style="color:rgba(255,255,255,.78)"><span>📁 '+st.projects+' مشاريع</span><span>👥 '+st.followers+' متابع</span><span>➜ '+st.following+' يتابع</span></div></div></div>'+(own?'<div class="section"><h3 style="color:#fff">🎨 اختر خلفية ملفك</h3><div style="display:flex;gap:8px;flex-wrap:wrap">'+gradients.map((g,i)=>'<button class="bgChoice" data-bg="'+esc(g)+'" style="width:54px;height:40px;border-radius:10px;border:2px solid '+(bg===g?'#fff':'rgba(255,255,255,.35)')+';background:'+esc(g)+';cursor:pointer" aria-label="خلفية '+(i+1)+'"></button>').join('')+'</div></div>':'')+'<div class="section"><h3 style="color:#fff">📁 المشاريع</h3><div class="projects">'+(ps.length?ps.map(p=>'<article class="project" style="background:rgba(0,0,0,.2);border-color:rgba(255,255,255,.18);color:#fff"><h4>'+esc(p.name)+'</h4><p style="color:rgba(255,255,255,.76)">مشروع منشور داخل Codethd</p><button class="btn primary openProject" data-id="'+p.id+'">مشاهدة المشروع</button></article>').join(''):'<div class="empty" style="background:rgba(0,0,0,.18);border-color:rgba(255,255,255,.2);color:#fff"><p style="color:rgba(255,255,255,.8)">لا توجد مشاريع منشورة بعد.</p></div>')+'</div></div></div>';
+    if($('profileFollow'))$('profileFollow').onclick=async()=>{await CodeTHDCloud.toggleFollow(id);await openProfile(id);await render()};
+    document.querySelectorAll('.bgChoice').forEach(b=>b.onclick=async()=>{localStorage.setItem('codethd-profile-bg',b.dataset.bg);await openProfile(me.id)});
     document.querySelectorAll('#profile .openProject').forEach(b=>b.onclick=()=>{localStorage.setItem('codethd-view-project-id',b.dataset.id);location.href='projects.html'});
     $('profile').scrollIntoView({behavior:'smooth',block:'start'});
   }
   async function render(){
-    const q=$('q').value.trim();$('profile').classList.remove('show');$('status').textContent='جارٍ التحميل...';$('results').innerHTML='<div class="loading">✨ نبحث لك عن مجتمع Codethd...</div>';
-    const people=q?await CodeTHDCloud.searchPeople(q):await CodeTHDCloud.allPeople();
-    const projects=q?await CodeTHDCloud.peopleProjects(q):[];
-    const followed=await CodeTHDCloud.followed();
-    const followedIds=new Set(followed.map(x=>x.id));
-    const cards=await Promise.all(people.map(personCard));
-    const friendCards=await Promise.all(followed.filter(u=>people.some(p=>p.id===u.id)||!q).map(personCard));
-    const projectCards=projects.map(p=>'<article class="card"><h3>'+esc(p.name)+'</h3><div class="username">بواسطة مستخدم Codethd</div><div class="actions2"><button class="btn primary openProject" data-id="'+p.id+'">مشاهدة المشروع</button></div></article>').join('');
-    $('status').textContent=q?(people.length+projects.length)+' نتيجة':'اكتشف '+people.length+' أعضاء في Codethd';
-    const uniqueFriendBlock=friendCards.length?'<div class="section-label">⭐ أصدقاؤك '+friendCards.length+'</div>'+friendCards.join(''):'';
-    const otherBlock=cards.filter((_,i)=>!followedIds.has(people[i]?.id)).join('');
-    $('results').innerHTML=(uniqueFriendBlock+otherBlock+projectCards)||'<div class="empty" style="grid-column:1/-1"><i class="fa-regular fa-face-frown"></i><h2>لا توجد نتائج</h2><p>جرّب اسمًا آخر.</p></div>';
-    bind();
+    const q=$('q').value.trim();$('profile').classList.remove('show');$('status').textContent='جارٍ التحميل...';$('results').innerHTML='<div class="loading">✨ نبحث في مجتمع Codethd...</div>';
+    try{
+      const [people,followed,projects]=await Promise.all([q?CodeTHDCloud.searchPeople(q):CodeTHDCloud.allPeople(),CodeTHDCloud.followed(),q?CodeTHDCloud.peopleProjects(q):Promise.resolve([])]);
+      const followedIds=new Set(followed.map(x=>x.id));
+      const friends=people.filter(p=>followedIds.has(p.id)), others=people.filter(p=>!followedIds.has(p.id));
+      const [friendCards,otherCards]=await Promise.all([Promise.all(friends.map(u=>card(u,followedIds))),Promise.all(others.map(u=>card(u,followedIds)))]);
+      const ownerIds=[...new Set(projects.map(p=>p.user_id))];const owners=ownerIds.length?await Promise.all(ownerIds.map(id=>CodeTHDCloud.profile(id))):[];
+      const byId=Object.fromEntries(owners.filter(Boolean).map(o=>[o.id,o]));
+      const projectCards=projects.map(p=>{const o=byId[p.user_id];return '<article class="card"><h3>'+esc(p.name)+'</h3><div class="username">بواسطة @'+esc(o?.username||'مستخدم')+'</div><div class="actions2"><button class="btn primary openProject" data-id="'+p.id+'">مشاهدة المشروع</button>'+(o?'<button class="btn profileBtn" data-id="'+o.id+'">صاحب المشروع</button>':'')+'</div></article>'}).join('');
+      $('status').textContent=q?(people.length+projects.length)+' نتيجة':people.length+' أعضاء • '+followed.length+' تتابعهم';
+      $('results').innerHTML=(friendCards.length?'<div class="section-label">⭐ أصدقاؤك <span class="friend-count">'+friendCards.length+'</span></div>'+friendCards.join(''):'')+
+        (otherCards.length?'<div class="section-label">👥 أعضاء Codethd <span class="friend-count">'+otherCards.length+'</span></div>'+otherCards.join(''):'')+
+        projectCards||'<div class="empty" style="grid-column:1/-1"><i class="fa-regular fa-face-frown"></i><h2>لا توجد نتائج</h2><p>ابحث باسم مستخدم أو مشروع.</p></div>';
+      bind();
+    }catch(e){$('status').textContent=CodeTHDCloud.errorText(e);$('results').innerHTML=''}
   }
-  function bind(){document.querySelectorAll('.profileBtn').forEach(b=>b.onclick=()=>openProfile(b.dataset.id));document.querySelectorAll('.followBtn').forEach(b=>b.onclick=async()=>{b.disabled=true;await CodeTHDCloud.toggleFollow(b.dataset.id);render()});document.querySelectorAll('.openProject').forEach(b=>b.onclick=()=>{localStorage.setItem('codethd-view-project-id',b.dataset.id);location.href='projects.html'})}
-  $('searchBtn').onclick=render;$('q').oninput=()=>render();$('q').onkeydown=e=>{if(e.key==='Enter')render()};
+  function bind(){document.querySelectorAll('.profileBtn').forEach(b=>b.onclick=()=>openProfile(b.dataset.id));document.querySelectorAll('.followBtn').forEach(b=>b.onclick=async()=>{b.disabled=true;try{await CodeTHDCloud.toggleFollow(b.dataset.id)}finally{render()}});document.querySelectorAll('.openProject').forEach(b=>b.onclick=()=>{localStorage.setItem('codethd-view-project-id',b.dataset.id);location.href='projects.html'})}
+  $('searchBtn').onclick=render;$('q').oninput=render;$('q').onkeydown=e=>{if(e.key==='Enter')render()};
   $('theme').onclick=()=>{const light=document.body.classList.toggle('light');localStorage.setItem('codethd-theme',light?'light-mode':'dark-mode');$('theme').textContent=light?'☀️':'🌙'};
   const t=localStorage.getItem('codethd-theme')||'dark-mode';document.body.classList.toggle('light',t==='light-mode');$('theme').textContent=t==='light-mode'?'☀️':'🌙';
   render();
