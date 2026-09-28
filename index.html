@@ -388,7 +388,7 @@
         }
     </style>
 </head>
-<body class="dark-mode green-code"><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="codethd-config.js?v=20260928.2"></script><script src="codethd-supabase.js?v=20260929.1"></script><script>window.CODETHD_AUTH_READY=CodeTHDCloud.ensureSession();</script>
+<body class="dark-mode green-code"><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="codethd-config.js?v=20260928.2"></script><script src="codethd-supabase.js?v=20260929.2"></script><script>window.CODETHD_AUTH_READY=CodeTHDCloud.ensureSession().catch(()=>null);</script>
 
     <div id="particles"></div>
 
@@ -994,12 +994,18 @@
 
         async function initApp() {
             const state = await window.CODETHD_AUTH_READY;
-            if (!state) { location.href='auth.html'; return; }
-            const session = state.session;
             initTheme();
             initLayout();
             const userBtn=document.getElementById('authUserBtn');
-            if(userBtn){ userBtn.innerHTML='<i class="fa-solid fa-user"></i> <span>'+String(state.profile?.display_name||state.profile?.username||'حسابي')+'</span>'; userBtn.title='الحساب @'+String(state.profile?.username||''); }
+            if(userBtn){
+                if(state){
+                    userBtn.innerHTML='<i class="fa-solid fa-user"></i> <span>'+String(state.profile?.display_name||state.profile?.username||'حسابي')+'</span>';
+                    userBtn.title='الحساب @'+String(state.profile?.username||'');
+                }else{
+                    userBtn.innerHTML='<i class="fa-solid fa-right-to-bracket"></i> <span class="hide-mobile">تسجيل الدخول</span>';
+                    userBtn.title='تسجيل الدخول أو إنشاء حساب';
+                }
+            }
             initEditors();
             await loadCodeFromLocalStorage();
             setupMobileTabs();
