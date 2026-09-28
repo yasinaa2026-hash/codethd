@@ -94,6 +94,8 @@ label{display:block;font-size:.84rem;font-weight:700;margin:13px 0 6px}
     }
 
     // Anonymous auth avoids email delivery/rate-limit errors.
+    // A username already owned by another account cannot be reclaimed anonymously.
+    if(existing) throw new Error('اسم المستخدم مستخدم بالفعل في Codethd. تسجيل الدخول إليه من جهاز آخر يحتاج نظام كلمة مرور/هوية دائمة.');
     const {data,error}=await sb.auth.signInAnonymously({
       options:{data:{username:username,display_name:$('username').value.trim()||username}}
     });
