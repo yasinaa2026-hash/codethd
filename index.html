@@ -388,7 +388,7 @@
         }
     </style>
 </head>
-<body class="dark-mode green-code"><script src="codethd-local.js?v=20260928.1"></script><script>window.CODETHD_AUTH_READY=Promise.resolve(CodeTHD.ensure());window.CODETHD_SESSION=CodeTHD.getCurrent();</script>
+<body class="dark-mode green-code"><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="codethd-config.js?v=20260928.2"></script><script src="codethd-supabase.js?v=20260928.2"></script><script>window.CODETHD_AUTH_READY=CodeTHDCloud.ensureSession();</script>
 
     <div id="particles"></div>
 
@@ -709,32 +709,34 @@
             const css = cssEditor.getValue();
             const js = jsEditor.getValue();
             const activeId = localStorage.getItem('codethd-active-project-id');
-            let project = activeId ? CodeTHD.updateProject(activeId,{html,css,js}) : null;
-            if (!project) {
-                project = CodeTHD.createProject({name:'مشروع Codethd',html,css,js});
-                if(project) localStorage.setItem('codethd-active-project-id',project.id);
+            try {
+                const result = await CodeTHDCloud.saveProject(activeId,{name:'مشروع Codethd',html,css,js});
+                localStorage.setItem('codethd-active-project-id',result.id);
+                await saveCodeToLocalStorage();
+                createParticles(18, 'sparkles');
+                const me = await CodeTHDCloud.ensureSession();
+                showNotification('تم حفظ المشروع في حساب @'+(me?.profile?.username||'ك')+' ✓');
+            } catch (e) {
+                console.error(e);
+                showNotification('تعذر حفظ المشروع: '+CodeTHDCloud.errorText(e));
             }
-            if (!project) {
-                showNotification('تعذر حفظ المشروع! ❌');
-                return;
-            }
-            await saveCodeToLocalStorage();
-            createParticles(18, 'sparkles');
-            showNotification('تم حفظ المشروع في حساب '+CodeTHD.getCurrent().username+' ✓');
         }
 
         async function loadCodeFromLocalStorage() {
             let loaded = false;
             const activeId = localStorage.getItem('codethd-active-project-id');
-            if (activeId) {
-                const data = CodeTHD.getProject(activeId);
-                if (data && data.userId === CodeTHD.getCurrent().id) {
-                    htmlEditor.setValue(data.html || '');
-                    cssEditor.setValue(data.css || '');
-                    jsEditor.setValue(data.js || '');
-                    loaded = true;
+            try {
+                if (activeId) {
+                    const data = await CodeTHDCloud.project(activeId);
+                    const me = await CodeTHDCloud.ensureSession();
+                    if (data && me && data.user_id === me.session.user.id) {
+                        htmlEditor.setValue(data.html || '');
+                        cssEditor.setValue(data.css || '');
+                        jsEditor.setValue(data.js || '');
+                        loaded = true;
+                    }
                 }
-            }
+            } catch(e) { console.warn('Could not load cloud project',e); }
             if (!loaded) {
                 const savedHtml = localStorage.getItem('codethd-html');
                 const savedCss = localStorage.getItem('codethd-css');
@@ -991,12 +993,13 @@
         }
 
         async function initApp() {
-            const session = CodeTHD.ensure();
-            if (!session) return;
+            const state = await window.CODETHD_AUTH_READY;
+            if (!state) { location.href='auth.html'; return; }
+            const session = state.session;
             initTheme();
             initLayout();
             const userBtn=document.getElementById('authUserBtn');
-            if(userBtn){ userBtn.innerHTML='<i class="fa-solid fa-user"></i> <span>'+String(session.displayName||session.username)+'</span>'; userBtn.title='الحساب @'+session.username; }
+            if(userBtn){ userBtn.innerHTML='<i class="fa-solid fa-user"></i> <span>'+String(state.profile?.display_name||state.profile?.username||'حسابي')+'</span>'; userBtn.title='الحساب @'+String(state.profile?.username||''); }
             initEditors();
             await loadCodeFromLocalStorage();
             setupMobileTabs();
