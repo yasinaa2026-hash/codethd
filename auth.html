@@ -32,94 +32,128 @@ label{display:block;font-size:.84rem;font-weight:700;margin:13px 0 6px}
 <main class="card">
 <div class="brand"><i class="fa-solid fa-code"></i> Codethd</div>
 <section class="hero"><div class="hero-icon"><i class="fa-solid fa-user-lock"></i></div><h1 id="title">تسجيل الدخول</h1><p>أنشئ حسابك داخل Codethd وابنِ ملفك ومشاريعك وتابع أصدقاءك.</p></section>
-<div class="tabs"><button class="tab active" id="loginTab">تسجيل الدخول</button><button class="tab" id="signupTab">إنشاء حساب</button></div>
+<div class="tabs"><button class="tab active" id="quickTab">دخول سريع</button><button class="tab" id="howTab">كيف يعمل؟</button></div>
 <form id="form">
-<div id="displayWrap" class="hidden"><label>اسمك الظاهر</label><input class="input" id="displayName" maxlength="80" autocomplete="name" placeholder="مثال: ياسين"></div>
-<label>اسم المستخدم</label><input class="input" id="username" maxlength="30" minlength="3" autocomplete="username" required placeholder="مثال: yasin_dev">
-<label>كلمة المرور</label><input class="input" id="password" type="password" minlength="6" autocomplete="current-password" required placeholder="6 أحرف على الأقل">
-<button class="primary" id="submit" type="submit">دخول</button>
+<label>اسم المستخدم</label>
+<input class="input" id="username" maxlength="30" minlength="3" autocomplete="username" required placeholder="مثال: yasin_dev">
+<button class="primary" id="submit" type="submit">دخول إلى Codethd</button>
 </form>
 <div id="msg" class="msg"></div>
-<div class="note">اسم المستخدم هو الاسم الذي سيبحث به أصدقاؤك عنك داخل Codethd.</div>
+<div class="note">اكتب اسم المستخدم فقط. لا يوجد بريد ولا كلمة مرور. اسمك هو هويتك داخل Codethd.</div>
 </main>
-<script src="supabase-config.js?v=20260928.3"></script>
+<script src="supabase-config.js?v=20260928.5"></script>
 <script>
 (function(){
 const U=window.CODETHD_SUPABASE_URL,K=window.CODETHD_SUPABASE_KEY;
 const configured=typeof U==='string'&&U.startsWith('https://')&&typeof K==='string'&&K.length>20;
-const supabase=configured?window.supabase.createClient(U,K):null;
-const $=id=>document.getElementById(id), msg=$('msg'), form=$('form'), submit=$('submit'), title=$('title');
-let mode='login';
-let cooldownUntil=Number(localStorage.getItem('codethd-signup-cooldown')||0);
-let cooldownTimer=null;
-function setMsg(t,type=''){msg.textContent=t;msg.className='msg '+type}
-function startCooldown(seconds=61){
-  cooldownUntil=Date.now()+seconds*1000;
-  localStorage.setItem('codethd-signup-cooldown',String(cooldownUntil));
-  clearInterval(cooldownTimer);
-  const tick=()=>{
-    const left=Math.max(0,Math.ceil((cooldownUntil-Date.now())/1000));
-    if(left>0){submit.disabled=true;submit.textContent=`انتظر ${left} ث`;}
-    else{clearInterval(cooldownTimer);localStorage.removeItem('codethd-signup-cooldown');submit.disabled=false;submit.textContent=mode==='login'?'دخول':'إنشاء الحساب';}
-  };
-  tick(); cooldownTimer=setInterval(tick,1000);
+const sb=configured?window.supabase.createClient(U,K):null;
+const $=id=>document.getElementById(id);
+
+function setMsg(text,type=''){ $('msg').textContent=text; $('msg').className='msg '+type; }
+function norm(v){return String(v||'').trim().toLowerCase();}
+function validUsername(v){return /^[a-z0-9_\\u0600-\\u06ff\\u0750-\\u077f.-]{3,30}$/i.test(v);}
+
+async function getSession(){
+  if(!sb) return null;
+  const {data,error}=await sb.auth.getSession();
+  return error?null:data.session;
 }
-function norm(v){return String(v||'').trim().toLowerCase()}
-function authEmail(username){
-  const bytes=new TextEncoder().encode(norm(username));let hex='';
-  for(const b of bytes)hex+=b.toString(16).padStart(2,'0');
-  return 'u-'+hex+'@auth.codethd.local';
+
+async function getProfile(session){
+  if(!session) return null;
+  const {data}=await sb.from('profiles').select('id,username,display_name').eq('id',session.user.id).maybeSingle();
+  return data||null;
 }
-function applyMode(){
-  $('loginTab').classList.toggle('active',mode==='login');$('signupTab').classList.toggle('active',mode==='signup');
-  $('displayWrap').classList.toggle('hidden',mode!=='signup');title.textContent=mode==='login'?'تسجيل الدخول':'إنشاء حساب';submit.textContent=mode==='login'?'دخول':'إنشاء الحساب';
-  $('password').autocomplete=mode==='login'?'current-password':'new-password';setMsg('');
+
+async function continueWithUsername(username, displayName){
+  const session=await getSession();
+  if(session){
+    const profile=await getProfile(session);
+    if(!profile){
+      setMsg('قاعدة بيانات Codethd غير جاهزة بعد. شغّل ملف supabase-schema.sql في Supabase ثم جرّب مرة أخرى.','error');
+      return false;
+    }
+    if(norm(profile.username)===username) return true;
+    const {data:used,error:lookupError}=await sb.from('profiles').select('id').eq('username_norm',username).maybeSingle();
+    if(lookupError) throw lookupError;
+    if(used && used.id!==session.user.id){
+      setMsg('اسم المستخدم هذا مستخدم من شخص آخر. اختر اسمًا مختلفًا.','error');
+      return false;
+    }
+    const {error}=await sb.from('profiles').update({
+      username,
+      username_norm:username,
+      display_name:displayName||username
+    }).eq('id',session.user.id);
+    if(error) throw error;
+    return true;
+  }
+
+  const {data,error}=await sb.auth.signInAnonymously({
+    options:{data:{username,display_name:displayName||username}}
+  });
+  if(error) throw error;
+  if(!data?.session?.user){
+    throw new Error('لم يتم إنشاء حساب Codethd.');
+  }
+
+  const profile=await getProfile(data.session);
+  if(!profile){
+    await sb.auth.signOut();
+    throw new Error('تمت جلسة الدخول، لكن قاعدة بيانات Codethd غير جاهزة. شغّل supabase-schema.sql أولًا.');
+  }
+  return true;
 }
-$('loginTab').onclick=()=>{mode='login';applyMode()};$('signupTab').onclick=()=>{mode='signup';applyMode()};
-form.onsubmit=async e=>{
- e.preventDefault();if(!configured){setMsg('لم يتم ربط Supabase بعد. افتح supabase-config.js وضع رابط المشروع والمفتاح العام.','error');return}
- const username=norm($('username').value),password=$('password').value;
- if(!/^[a-z0-9_\u0600-\u06ff\u0750-\u077f.-]{3,30}$/i.test(username)){setMsg('اسم المستخدم يجب أن يكون من 3 إلى 30 حرفًا ويمكن أن يحتوي على حروف وأرقام و _ أو . أو - أو حروف عربية.','error');return}
- submit.disabled=true;setMsg(mode==='login'?'جارٍ تسجيل الدخول...':'جارٍ إنشاء الحساب...');
- try{
-   if(mode==='login'){
-     const {error}=await supabase.auth.signInWithPassword({email:authEmail(username),password});
-     if(error)throw error;
-     location.href='index.html';
-   }else{
-     const display=$('displayName').value.trim()||username;
-     const {data,error}=await supabase.auth.signUp({email:authEmail(username),password,options:{data:{username,display_name:display}}});
-     if(error)throw error;
-     if(!data.session){
-       setMsg('تم إنشاء الحساب، لكن تأكيد البريد مفعّل في Supabase. هذا الموقع يستخدم اسم مستخدم بدل البريد؛ عطّل Confirm email من Authentication → Settings ثم سجّل الحساب مرة واحدة.','error');
-       return;
-     }
-     location.href='index.html';
-   }
- }catch(error){
-   const code=String(error?.code||'').toLowerCase();
-   const status=Number(error?.status||0);
-   const text=String(error?.message||'').toLowerCase();
-   if(code.includes('over_email_send_rate_limit')||text.includes('email rate limit')||text.includes('email rate limit exceeded')||status===429){
-     setMsg('Supabase يمنع إرسال رسائل بريد مؤقتًا. هذا الموقع لا يحتاج بريدًا للمستخدم؛ عطّل Confirm email من Authentication → Settings، ثم انتظر قليلًا واضغط إنشاء الحساب مرة واحدة.','error');
-     if(mode==='signup') startCooldown(61);
-   }else if(code.includes('over_request_rate_limit')||text.includes('rate limit')){
-     setMsg('تم الوصول لحد الطلبات مؤقتًا. انتظر قليلًا ثم حاول مرة واحدة.','error');
-     startCooldown(61);
-   }else if(text.includes('user already registered')){
-     setMsg('اسم المستخدم هذا مسجّل بالفعل. جرّب تسجيل الدخول أو اختر اسم مستخدم آخر.','error');
-   }else if(text.includes('password should be at least')){
-     setMsg('كلمة المرور يجب أن تكون 6 أحرف على الأقل.','error');
-   }else{
-     setMsg(error.message||'حدث خطأ أثناء العملية. حاول مرة أخرى.','error');
-   }
-   submit.disabled = Date.now() < cooldownUntil;
- }finally{
-   if(Date.now() >= cooldownUntil) submit.disabled=false;
- }
+
+$('form').onsubmit=async e=>{
+  e.preventDefault();
+  if(!configured){setMsg('تعذر الاتصال بـ Codethd حاليًا. تحقق من إعدادات Supabase.','error');return}
+  const raw=$('username').value.trim();
+  const username=norm(raw);
+  if(!validUsername(username)){
+    setMsg('اسم المستخدم من 3 إلى 30 حرفًا ويمكن أن يحتوي على حروف وأرقام و _ أو . أو - .','error');
+    return;
+  }
+  const displayName=raw;
+  $('submit').disabled=true;
+  setMsg('جارٍ دخولك إلى Codethd...');
+  try{
+    const ok=await continueWithUsername(username,displayName);
+    if(ok) location.href='index.html';
+  }catch(error){
+    const t=String(error?.message||'').toLowerCase();
+    if(t.includes('anonymous')||t.includes('disabled')){
+      setMsg('فعّل Allow anonymous sign-ins من إعدادات Authentication في Supabase حتى يعمل الدخول بدون بريد وكلمة مرور.','error');
+    }else if(t.includes('duplicate')||t.includes('unique')||t.includes('username_norm')){
+      setMsg('اسم المستخدم مستخدم بالفعل. اختر اسمًا مختلفًا.','error');
+    }else if(t.includes('rate limit')||Number(error?.status)===429){
+      setMsg('تم الوصول لحد الطلبات مؤقتًا. انتظر قليلًا ثم جرّب مرة واحدة.','error');
+    }else{
+      setMsg(error?.message||'حدث خطأ. حاول مرة أخرى.','error');
+    }
+  }finally{
+    $('submit').disabled=false;
+  }
 };
-$('theme').onclick=()=>{const light=document.body.classList.toggle('light');localStorage.setItem('codethd-theme',light?'light-mode':'dark-mode');$('theme').textContent=light?'☀️':'🌙'};
-const saved=localStorage.getItem('codethd-theme')||'dark-mode';document.body.classList.toggle('light',saved==='light-mode');$('theme').textContent=saved==='light-mode'?'☀️':'🌙';
+
+$('quickTab').onclick=()=>setMsg('اكتب اسم المستخدم فقط ثم ادخل. لا يوجد بريد ولا كلمة مرور.','ok');
+$('howTab').onclick=()=>setMsg('Codethd يحفظ ملفك ومشاريعك واسمك داخل الموقع. نفس المتصفح يحافظ على جلستك تلقائيًا.','ok');
+$('theme').onclick=()=>{
+  const light=document.body.classList.toggle('light');
+  localStorage.setItem('codethd-theme',light?'light-mode':'dark-mode');
+  $('theme').textContent=light?'☀️':'🌙';
+};
+const saved=localStorage.getItem('codethd-theme')||'dark-mode';
+document.body.classList.toggle('light',saved==='light-mode');
+$('theme').textContent=saved==='light-mode'?'☀️':'🌙';
+
+(async()=>{
+  const session=await getSession();
+  if(session){
+    const profile=await getProfile(session);
+    if(profile) $('username').value=profile.username||'';
+  }
+})();
 })();
 </script>
 </body>
