@@ -96,7 +96,7 @@
 
 <script>
 (function(){
-    const projectKey='codethd-projects';
+    const projectKey='codethd-projects';\n    const configured=!!(window.CODETHD_SUPABASE_URL&&window.CODETHD_SUPABASE_KEY);\n    const supabase= configured ? window.supabase.createClient(window.CODETHD_SUPABASE_URL,window.CODETHD_SUPABASE_KEY) : null;\n    let session=null;
     const themeKey='codethd-theme';
     const projectsEl=document.getElementById('projects');
     const countEl=document.getElementById('count');
@@ -156,7 +156,7 @@
 
         projectsEl.querySelectorAll('.open').forEach(btn=>{
             btn.addEventListener('click',()=>{
-                const project=getProjects()[Number(btn.dataset.index)];
+                getProjects().then(list=>{ const project=list[Number(btn.dataset.index)];
                 if(!project)return;
                 localStorage.setItem('codethd-html',project.html||'');
                 localStorage.setItem('codethd-css',project.css||'');
