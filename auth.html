@@ -5,6 +5,9 @@
 <title>حسابك - Codethd</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🦊</text></svg>">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="codethd-config.js?v=20260928.2"></script>
+<script src="codethd-supabase.js?v=20260928.2"></script>
 <style>
 :root{--bg:#121212;--panel:#1e1e1e;--header:#181818;--text:#e0e0e0;--muted:#9ca3af;--border:#2a2a2a;--accent:#20c997;--hover:#12b886;--danger:#ff6b6b}
 body.light{--bg:#f8f9fa;--panel:#fff;--header:#e9ecef;--text:#212529;--muted:#6c757d;--border:#dee2e6;--accent:#0ca678;--hover:#099268}
@@ -36,43 +39,42 @@ label{display:block;font-size:.84rem;font-weight:700;margin:13px 0 6px}
     <p>لا بريد إلكتروني، لا Supabase، ولا إعدادات خارجية. اختر اسمك وادخل مباشرة إلى Codethd.</p>
   </section>
   <div class="tabs">
-    <button class="tab active" id="startTab" type="button">دخول مباشر</button>
-    <button class="tab" id="howTab" type="button">كيف يعمل؟</button>
-  </div>
-  <form id="form">
-    <label for="username">اسم المستخدم</label>
-    <input class="input" id="username" maxlength="30" minlength="3" autocomplete="username" required placeholder="مثال: yasin_dev">
-    <button class="primary" id="submit" type="submit"><i class="fa-solid fa-arrow-right-to-bracket"></i> الدخول إلى Codethd</button>
+  <button class="tab active" id="loginTab" type="button">تسجيل الدخول</button>
+  <button class="tab" id="signupTab" type="button">حساب جديد</button>
+</div>
+<div id="loginBox">
+  <form id="loginForm">
+    <label>اسم المستخدم</label><input class="input" id="loginUsername" maxlength="24" autocomplete="username" required placeholder="yasin_dev">
+    <label>كلمة المرور</label><input class="input" id="loginPassword" type="password" minlength="8" autocomplete="current-password" required placeholder="••••••••">
+    <button class="primary" id="loginBtn" type="submit"><i class="fa-solid fa-right-to-bracket"></i> دخول</button>
   </form>
+</div>
+<div id="signupBox" class="hidden">
+  <form id="signupForm">
+    <label>اسم المستخدم</label><input class="input" id="signupUsername" maxlength="24" autocomplete="username" required placeholder="yasin_dev">
+    <label>الاسم الظاهر</label><input class="input" id="displayName" maxlength="50" required placeholder="Yasin">
+    <label>كلمة المرور</label><input class="input" id="signupPassword" type="password" minlength="8" autocomplete="new-password" required placeholder="8 أحرف على الأقل">
+    <button class="primary" id="signupBtn" type="submit"><i class="fa-solid fa-user-plus"></i> إنشاء الحساب</button>
+  </form>
+</div>
   <div id="msg" class="msg"></div>
-  <div class="note">الحساب محفوظ داخل متصفحك. يبدأ الموقع بحساب <b>yasin</b> تلقائيًا، ويمكنك إنشاء أسماء أخرى من نفس الصفحة.</div>
+  <div class="note">حسابك محفوظ في Codethd، وستبقى مسجل الدخول عند عودتك للموقع.</div>
   <a href="index.html" class="tab" style="display:block;text-align:center;text-decoration:none;margin-top:12px">فتح المحرر مباشرة</a>
 </main>
-<script src="codethd-local.js?v=20260928.1"></script>
 <script>
-(function(){
-  const $=id=>document.getElementById(id);
-  const me=CodeTHD.ensure();
-  $('username').value=me?.username||'yasin';
-  function msg(t,type=''){ $('msg').textContent=t; $('msg').className='msg '+type; }
-  $('form').addEventListener('submit',e=>{
-    e.preventDefault();
-    const raw=$('username').value.trim(), n=raw.toLowerCase();
-    if(!CodeTHD.validUsername(n)){msg('استخدم اسمًا من 3 إلى 30 حرفًا مثل yasin_dev.','error');return}
-    const user=CodeTHD.login(n,raw);
-    msg('تم الدخول باسم @'+user.username+' ✓','ok');
-    setTimeout(()=>location.href='index.html',180);
-  });
-  $('startTab').onclick=()=>msg('اكتب اسم المستخدم واضغط دخول. سيتم إنشاء الحساب تلقائيًا إن لم يكن موجودًا.','ok');
-  $('howTab').onclick=()=>msg('Codethd يعمل محليًا من الكود نفسه: الحساب والمشاريع والمتابعات محفوظة في متصفحك.','ok');
-  $('theme').onclick=()=>{
-    const light=document.body.classList.toggle('light');
-    localStorage.setItem('codethd-theme',light?'light-mode':'dark-mode');
-    $('theme').textContent=light?'☀️':'🌙';
-  };
-  const saved=localStorage.getItem('codethd-theme')||'dark-mode';
-  document.body.classList.toggle('light',saved==='light-mode');
-  $('theme').textContent=saved==='light-mode'?'☀️':'🌙';
+(async function(){
+const $=id=>document.getElementById(id);
+function msg(t,type=''){ $('msg').textContent=t; $('msg').className='msg '+type; }
+function switchTab(login){$('loginTab').classList.toggle('active',login);$('signupTab').classList.toggle('active',!login);$('loginBox').classList.toggle('hidden',!login);$('signupBox').classList.toggle('hidden',login);msg('')}
+$('loginTab').onclick=()=>switchTab(true);$('signupTab').onclick=()=>switchTab(false);
+try{
+  const s=await CodeTHDCloud.ensureSession();
+  if(s){$('loginUsername').value=s.profile.username||'';msg('أنت مسجل الدخول بالفعل ✓','ok');setTimeout(()=>location.href='index.html',300)}
+}catch(e){console.warn(e)}
+$('loginForm').onsubmit=async e=>{e.preventDefault();const b=$('loginBtn');b.disabled=true;msg('جارٍ تسجيل الدخول...');try{await CodeTHDCloud.signIn($('loginUsername').value,$('loginPassword').value);msg('تم الدخول ✓','ok');setTimeout(()=>location.href='index.html',250)}catch(e){msg(CodeTHDCloud.errorText(e),'error')}finally{b.disabled=false}};
+$('signupForm').onsubmit=async e=>{e.preventDefault();const b=$('signupBtn');b.disabled=true;msg('جارٍ إنشاء حسابك...');try{await CodeTHDCloud.signUp($('signupUsername').value,$('signupPassword').value,$('displayName').value);msg('تم إنشاء الحساب 🎉','ok');setTimeout(()=>location.href='index.html',350)}catch(e){msg(CodeTHDCloud.errorText(e),'error')}finally{b.disabled=false}};
+$('theme').onclick=()=>{const light=document.body.classList.toggle('light');localStorage.setItem('codethd-theme',light?'light-mode':'dark-mode');$('theme').textContent=light?'☀️':'🌙'};
+const t=localStorage.getItem('codethd-theme')||'dark-mode';document.body.classList.toggle('light',t==='light-mode');$('theme').textContent=t==='light-mode'?'☀️':'🌙';
 })();
 </script>
 </body>
