@@ -80,7 +80,19 @@ form.onsubmit=async e=>{
      if(!data.session){setMsg('تم إنشاء الحساب، لكن إعداد تأكيد البريد مفعّل. عطّل Confirm Email في إعدادات Supabase ثم جرّب التسجيل مرة أخرى.','error');return}
      location.href='index.html';
    }
- }catch(error){setMsg(error.message||'حدث خطأ. حاول مرة أخرى.','error')}finally{submit.disabled=false}
+ }catch(error){
+   const code=String(error?.code||'').toLowerCase();
+   const text=String(error?.message||'').toLowerCase();
+   if(code.includes('over_email_send_rate_limit')||text.includes('email rate limit')||text.includes('rate limit exceeded')){
+     setMsg('تم تجاوز حد التسجيل/البريد مؤقتًا من Supabase. انتظر قليلًا ثم حاول مرة واحدة فقط. وإذا كان تأكيد البريد مفعّلًا، عطّله من Authentication → Settings → Confirm email.','error');
+   }else if(code.includes('over_request_rate_limit')){
+     setMsg('تم تجاوز حد الطلبات مؤقتًا. انتظر بضع دقائق ثم حاول مرة أخرى.','error');
+   }else if(text.includes('user already registered')){
+     setMsg('اسم المستخدم هذا مسجّل من قبل. اختر اسم مستخدم آخر أو استخدم تسجيل الدخول.','error');
+   }else{
+     setMsg(error.message||'حدث خطأ. حاول مرة أخرى.','error');
+   }
+ }finally{submit.disabled=false}
 };
 $('theme').onclick=()=>{const light=document.body.classList.toggle('light');localStorage.setItem('codethd-theme',light?'light-mode':'dark-mode');$('theme').textContent=light?'☀️':'🌙'};
 const saved=localStorage.getItem('codethd-theme')||'dark-mode';document.body.classList.toggle('light',saved==='light-mode');$('theme').textContent=saved==='light-mode'?'☀️':'🌙';
