@@ -19,7 +19,7 @@
     return e?.message||'حدث خطأ غير متوقع.';
   };
   async function session(){const r=await client.auth.getSession();if(r.error)throw r.error;return r.data.session||null}
-  async function profile(userId){const r=await client.from('profiles').select('id,username,display_name,bio,avatar_url,background,created_at').eq('id',userId).maybeSingle();if(r.error)throw r.error;return r.data||null}
+  async function profile(userId){const r=await client.from('profiles').select('id,username,display_name,bio,avatar_url,created_at').eq('id',userId).maybeSingle();if(r.error)throw r.error;return r.data||null}
   async function signUp(username,password,displayName){
     const u=cleanUsername(username); if(!usernameOk(u)) throw new Error('اسم المستخدم يجب أن يكون 3-24 حرفًا بالإنجليزية أو أرقام أو _.');
     if(!passwordOk(password)) throw new Error('كلمة المرور يجب أن تكون 8 أحرف على الأقل.');
@@ -53,21 +53,22 @@
     const r=await client.from('projects').select('id,name,html,css,js,updated_at,user_id').eq('user_id',s.user.id).order('updated_at',{ascending:false});
     if(r.error)throw r.error;return r.data||[];
   }
+  async function userProjects(userId){const r=await client.from('projects').select('id,name,html,css,js,updated_at,user_id').eq('user_id',userId).order('updated_at',{ascending:false});if(r.error)throw r.error;return r.data||[]}
   async function project(id){const r=await client.from('projects').select('id,name,html,css,js,updated_at,user_id').eq('id',id).maybeSingle();if(r.error)throw r.error;return r.data||null}
   async function deleteProject(id){const s=await session();if(!s)return;const r=await client.from('projects').delete().eq('id',id).eq('user_id',s.user.id);if(r.error)throw r.error}
   async function searchPeople(q){
     const s=await session();if(!s)return [];
     const term='%'+String(q||'').trim()+'%';
     const [a,b]=await Promise.all([
-      client.from('profiles').select('id,username,display_name,bio,avatar_url,background,created_at').ilike('username_norm',term).neq('id',s.user.id).limit(40),
-      client.from('profiles').select('id,username,display_name,bio,avatar_url,background,created_at').ilike('display_name',term).neq('id',s.user.id).limit(40)
+      client.from('profiles').select('id,username,display_name,bio,avatar_url,created_at').ilike('username_norm',term).neq('id',s.user.id).limit(60),
+      client.from('profiles').select('id,username,display_name,bio,avatar_url,created_at').ilike('display_name',term).neq('id',s.user.id).limit(60)
     ]);
     if(a.error)throw a.error;if(b.error)throw b.error;
     const map=new Map();[...(a.data||[]),...(b.data||[])].forEach(x=>map.set(x.id,x));return [...map.values()];
   }
   async function allPeople(){
     const s=await session();if(!s)return [];
-    const r=await client.from('profiles').select('id,username,display_name,bio,avatar_url,background,created_at').neq('id',s.user.id).order('created_at',{ascending:false}).limit(100);
+    const r=await client.from('profiles').select('id,username,display_name,bio,avatar_url,created_at').neq('id',s.user.id).order('created_at',{ascending:false}).limit(100);
     if(r.error)throw r.error;return r.data||[];
   }
   async function peopleProjects(q){
@@ -80,7 +81,7 @@
     const s=await session();if(!s)return [];
     const r=await client.from('follows').select('following_id').eq('follower_id',s.user.id);if(r.error)throw r.error;
     const ids=(r.data||[]).map(x=>x.following_id);if(!ids.length)return [];
-    const p=await client.from('profiles').select('id,username,display_name,bio,avatar_url,background,created_at').in('id',ids);
+    const p=await client.from('profiles').select('id,username,display_name,bio,avatar_url,created_at').in('id',ids);
     if(p.error)throw p.error;return p.data||[];
   }
   async function isFollowing(id){const s=await session();if(!s)return false;const r=await client.from('follows').select('following_id').eq('follower_id',s.user.id).eq('following_id',id).maybeSingle();if(r.error)throw r.error;return !!r.data}
@@ -100,8 +101,8 @@
   }
   async function updateProfile(data){
     const s=await session();if(!s)throw new Error('انتهت الجلسة.');
-    const r=await client.from('profiles').update(data).eq('id',s.user.id).select('id,username,display_name,bio,avatar_url,background').single();
+    const r=await client.from('profiles').update(data).eq('id',s.user.id).select('id,username,display_name,bio,avatar_url').single();
     if(r.error)throw r.error;return r.data;
   }
-  window.CodeTHDCloud={client,emailForUsername,usernameOk,passwordOk,errorText,session,profile,signUp,signIn,ensureSession,signOut,saveProject,ownProjects,project,deleteProject,searchPeople,allPeople,peopleProjects,followed,isFollowing,toggleFollow,stats,updateProfile};
+  window.CodeTHDCloud={client,emailForUsername,usernameOk,passwordOk,errorText,session,profile,signUp,signIn,ensureSession,signOut,saveProject,ownProjects,userProjects,project,deleteProject,searchPeople,allPeople,peopleProjects,followed,isFollowing,toggleFollow,stats,updateProfile};
 })();
