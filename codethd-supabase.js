@@ -47,10 +47,10 @@
   async function saveProject(id,data){
     const s=await session(); if(!s)throw new Error('انتهت الجلسة.');
     if(id){
-      const r=await client.from('projects').update({name:data.name||'مشروع Codethd',html:data.html||'',css:data.css||'',js:data.js||''}).eq('id',id).eq('user_id',s.user.id).select('id').maybeSingle();
+      const r=await withTimeout(client.from('projects').update({name:data.name||'مشروع Codethd',html:data.html||'',css:data.css||'',js:data.js||''}).eq('id',id).eq('user_id',s.user.id).select('id').maybeSingle(),7000,'حفظ المشروع');
       if(r.error)throw r.error;if(r.data)return r.data;
     }
-    const r=await client.from('projects').insert({user_id:s.user.id,name:data.name||'مشروع Codethd',html:data.html||'',css:data.css||'',js:data.js||''}).select('id').single();
+    const r=await withTimeout(client.from('projects').insert({user_id:s.user.id,name:data.name||'مشروع Codethd',html:data.html||'',css:data.css||'',js:data.js||''}).select('id').single(),7000,'حفظ المشروع');
     if(r.error)throw r.error;return r.data;
   }
   async function ownProjects(){
@@ -58,9 +58,9 @@
     const r=await client.from('projects').select('id,name,html,css,js,updated_at,user_id').eq('user_id',s.user.id).order('updated_at',{ascending:false});
     if(r.error)throw r.error;return r.data||[];
   }
-  async function userProjects(userId){const r=await client.from('projects').select('id,name,html,css,js,updated_at,user_id').eq('user_id',userId).order('updated_at',{ascending:false});if(r.error)throw r.error;return r.data||[]}
-  async function project(id){const r=await client.from('projects').select('id,name,html,css,js,updated_at,user_id').eq('id',id).maybeSingle();if(r.error)throw r.error;return r.data||null}
-  async function deleteProject(id){const s=await session();if(!s)return;const r=await client.from('projects').delete().eq('id',id).eq('user_id',s.user.id);if(r.error)throw r.error}
+  async function userProjects(userId){const r=await withTimeout(client.from('projects').select('id,name,html,css,js,updated_at,user_id').eq('user_id',userId).order('updated_at',{ascending:false}),7000,'تحميل المشاريع');if(r.error)throw r.error;return r.data||[]}
+  async function project(id){const r=await withTimeout(client.from('projects').select('id,name,html,css,js,updated_at,user_id').eq('id',id).maybeSingle(),7000,'تحميل المشروع');if(r.error)throw r.error;return r.data||null}
+  async function deleteProject(id){const s=await session();if(!s)return;const r=await withTimeout(client.from('projects').delete().eq('id',id).eq('user_id',s.user.id),7000,'حذف المشروع');if(r.error)throw r.error}
   async function searchPeople(q){
     const s=await session();if(!s)return [];
     const term='%'+String(q||'').trim()+'%';
