@@ -42,15 +42,28 @@ label{display:block;font-size:.84rem;font-weight:700;margin:13px 0 6px}
 <div id="msg" class="msg"></div>
 <div class="note">اسم المستخدم هو الاسم الذي سيبحث به أصدقاؤك عنك داخل Codethd.</div>
 </main>
-<script src="supabase-config.js?v=20260928"></script>
+<script src="supabase-config.js?v=20260928.3"></script>
 <script>
 (function(){
 const U=window.CODETHD_SUPABASE_URL,K=window.CODETHD_SUPABASE_KEY;
-const configured=U&&K;
+const configured=typeof U==='string'&&U.startsWith('https://')&&typeof K==='string'&&K.length>20;
 const supabase=configured?window.supabase.createClient(U,K):null;
 const $=id=>document.getElementById(id), msg=$('msg'), form=$('form'), submit=$('submit'), title=$('title');
 let mode='login';
+let cooldownUntil=Number(localStorage.getItem('codethd-signup-cooldown')||0);
+let cooldownTimer=null;
 function setMsg(t,type=''){msg.textContent=t;msg.className='msg '+type}
+function startCooldown(seconds=61){
+  cooldownUntil=Date.now()+seconds*1000;
+  localStorage.setItem('codethd-signup-cooldown',String(cooldownUntil));
+  clearInterval(cooldownTimer);
+  const tick=()=>{
+    const left=Math.max(0,Math.ceil((cooldownUntil-Date.now())/1000));
+    if(left>0){submit.disabled=true;submit.textContent=`انتظر ${left} ث`;}
+    else{clearInterval(cooldownTimer);localStorage.removeItem('codethd-signup-cooldown');submit.disabled=false;submit.textContent=mode==='login'?'دخول':'إنشاء الحساب';}
+  };
+  tick(); cooldownTimer=setInterval(tick,1000);
+}
 function norm(v){return String(v||'').trim().toLowerCase()}
 function authEmail(username){
   const bytes=new TextEncoder().encode(norm(username));let hex='';
@@ -77,22 +90,33 @@ form.onsubmit=async e=>{
      const display=$('displayName').value.trim()||username;
      const {data,error}=await supabase.auth.signUp({email:authEmail(username),password,options:{data:{username,display_name:display}}});
      if(error)throw error;
-     if(!data.session){setMsg('تم إنشاء الحساب، لكن إعداد تأكيد البريد مفعّل. عطّل Confirm Email في إعدادات Supabase ثم جرّب التسجيل مرة أخرى.','error');return}
+     if(!data.session){
+       setMsg('تم إنشاء الحساب، لكن تأكيد البريد مفعّل في Supabase. هذا الموقع يستخدم اسم مستخدم بدل البريد؛ عطّل Confirm email من Authentication → Settings ثم سجّل الحساب مرة واحدة.','error');
+       return;
+     }
      location.href='index.html';
    }
  }catch(error){
    const code=String(error?.code||'').toLowerCase();
+   const status=Number(error?.status||0);
    const text=String(error?.message||'').toLowerCase();
-   if(code.includes('over_email_send_rate_limit')||text.includes('email rate limit')||text.includes('rate limit exceeded')){
-     setMsg('تم تجاوز حد التسجيل/البريد مؤقتًا من Supabase. انتظر قليلًا ثم حاول مرة واحدة فقط. وإذا كان تأكيد البريد مفعّلًا، عطّله من Authentication → Settings → Confirm email.','error');
-   }else if(code.includes('over_request_rate_limit')){
-     setMsg('تم تجاوز حد الطلبات مؤقتًا. انتظر بضع دقائق ثم حاول مرة أخرى.','error');
+   if(code.includes('over_email_send_rate_limit')||text.includes('email rate limit')||text.includes('email rate limit exceeded')||status===429){
+     setMsg('Supabase يمنع إرسال رسائل بريد مؤقتًا. هذا الموقع لا يحتاج بريدًا للمستخدم؛ عطّل Confirm email من Authentication → Settings، ثم انتظر قليلًا واضغط إنشاء الحساب مرة واحدة.','error');
+     if(mode==='signup') startCooldown(61);
+   }else if(code.includes('over_request_rate_limit')||text.includes('rate limit')){
+     setMsg('تم الوصول لحد الطلبات مؤقتًا. انتظر قليلًا ثم حاول مرة واحدة.','error');
+     startCooldown(61);
    }else if(text.includes('user already registered')){
-     setMsg('اسم المستخدم هذا مسجّل من قبل. اختر اسم مستخدم آخر أو استخدم تسجيل الدخول.','error');
+     setMsg('اسم المستخدم هذا مسجّل بالفعل. جرّب تسجيل الدخول أو اختر اسم مستخدم آخر.','error');
+   }else if(text.includes('password should be at least')){
+     setMsg('كلمة المرور يجب أن تكون 6 أحرف على الأقل.','error');
    }else{
-     setMsg(error.message||'حدث خطأ. حاول مرة أخرى.','error');
+     setMsg(error.message||'حدث خطأ أثناء العملية. حاول مرة أخرى.','error');
    }
- }finally{submit.disabled=false}
+   submit.disabled = Date.now() < cooldownUntil;
+ }finally{
+   if(Date.now() >= cooldownUntil) submit.disabled=false;
+ }
 };
 $('theme').onclick=()=>{const light=document.body.classList.toggle('light');localStorage.setItem('codethd-theme',light?'light-mode':'dark-mode');$('theme').textContent=light?'☀️':'🌙'};
 const saved=localStorage.getItem('codethd-theme')||'dark-mode';document.body.classList.toggle('light',saved==='light-mode');$('theme').textContent=saved==='light-mode'?'☀️':'🌙';
