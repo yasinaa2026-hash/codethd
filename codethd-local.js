@@ -8,11 +8,20 @@
   const uid=()=> 'u_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,8);
   const pid=()=> 'p_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,8);
   const now=()=>new Date().toISOString();
+  const DEFAULT_BG='linear-gradient(135deg,#20c997 0%,#0f766e 55%,#111827 100%)';
+  const BG_OPTIONS=[
+    'linear-gradient(135deg,#20c997 0%,#0f766e 55%,#111827 100%)',
+    'linear-gradient(135deg,#6366f1 0%,#8b5cf6 50%,#ec4899 100%)',
+    'linear-gradient(135deg,#0ea5e9 0%,#06b6d4 50%,#14b8a6 100%)',
+    'linear-gradient(135deg,#f59e0b 0%,#ef4444 50%,#be185d 100%)',
+    'linear-gradient(135deg,#111827 0%,#334155 50%,#0f172a 100%)',
+    'linear-gradient(135deg,#22c55e 0%,#84cc16 50%,#15803d 100%)'
+  ];
   const starterHtml='<div class="box">أهلاً بك في Codethd 👋</div>';
   const starterCss='.box{background:linear-gradient(135deg,#20c997,#099268);padding:24px;color:#fff;border-radius:16px;text-align:center;font-size:1.4rem;font-weight:800;box-shadow:0 12px 30px rgba(32,201,151,.25)}';
   const starterJs="console.log('أهلاً بك في Codethd!');";
   function fresh(){
-    const y={id:'u_yasin',username:'yasin',displayName:'Yasin',bio:'مطور في Codethd 🚀',avatar:'',createdAt:now()};
+    const y={id:'u_yasin',username:'yasin',displayName:'Yasin',bio:'مطور في Codethd 🚀',avatar:'',background:DEFAULT_BG,createdAt:now()};
     return {
       version:3,
       users:[y],
@@ -51,7 +60,7 @@
     if(!validUsername(n)) throw new Error('اسم المستخدم غير صالح.');
     let u=d.users.find(x=>x.username===n);
     if(!u){
-      u={id:uid(),username:n,displayName:(displayName||n).trim(),bio:'عضو جديد في Codethd ✨',avatar:'',createdAt:now()};
+      u={id:uid(),username:n,displayName:(displayName||n).trim(),bio:'عضو جديد في Codethd ✨',avatar:'',background:BG_OPTIONS[Math.floor(Math.random()*BG_OPTIONS.length)],createdAt:now()};
       d.users.push(u); write(d);
     } else if(displayName && !u.displayName){u.displayName=displayName.trim();write(d)}
     setCurrent(u.id); return u;
@@ -62,6 +71,7 @@
       (!n || clean(u.username).includes(n)||clean(u.displayName).includes(n)));
   }
   function getProfile(id){return read().users.find(u=>u.id===id)||null}
+  function updateProfile(id,data){const d=read(),u=d.users.find(x=>x.id===id);if(!u)return null;Object.assign(u,{displayName:data.displayName??u.displayName,bio:data.bio??u.bio,avatar:data.avatar??u.avatar,background:data.background||u.background||DEFAULT_BG});write(d);return u}
   function getProjects(userId){return read().projects.filter(p=>p.userId===userId).sort((a,b)=>String(b.updatedAt).localeCompare(String(a.updatedAt)))}
   function getProject(id){return read().projects.find(p=>p.id===id)||null}
   function searchProjects(q){
@@ -94,6 +104,6 @@
   ensure();
   window.CodeTHD={
     KEY,CURRENT,ensure,getCurrent,login,logout,setCurrent,getUsers,getProfile,getProjects,getProject,
-    searchProjects,createProject,updateProject,removeProject,isFollowing,toggleFollow,following,validUsername
+    searchProjects,createProject,updateProject,removeProject,isFollowing,toggleFollow,following,validUsername,updateProfile,BG_OPTIONS,DEFAULT_BG
   };
 })();
