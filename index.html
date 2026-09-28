@@ -387,8 +387,8 @@
             }
         }
     </style>
-</head>
-<body class="dark-mode green-code">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="supabase-config.js"></script></head>
+<body class="dark-mode green-code"><script>window.CODETHD_AUTH_GUARD=true;(async()=>{try{if(!window.CODETHD_SUPABASE_URL||!window.CODETHD_SUPABASE_KEY){location.href="auth.html";return}const sb=window.supabase.createClient(window.CODETHD_SUPABASE_URL,window.CODETHD_SUPABASE_KEY);const {data}=await sb.auth.getSession();if(!data.session)location.href="auth.html";else window.CODETHD_SESSION=data.session}catch(e){console.error(e);location.href="auth.html"}})();</script>
 
     <div id="particles"></div>
 
@@ -412,7 +412,7 @@
                 <span class="theme-icon">🌙</span>
             </button>
         </div>
-    </header>
+    <a class="btn" id="authUserBtn" href="auth.html" title="الحساب"><i class="fa-solid fa-user"></i> <span class="hide-mobile">الحساب</span></a></header>
 
     <div class="mobile-tabs">
         <button class="tab-btn active" data-tab="preview-tab">النتيجة (Preview)</button>
