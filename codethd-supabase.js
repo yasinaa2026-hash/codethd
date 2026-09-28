@@ -20,7 +20,7 @@
   };
   const withTimeout=(promise,ms=12000,label='الطلب')=>Promise.race([promise,new Promise((_,reject)=>setTimeout(()=>reject(new Error(label+' استغرق وقتًا طويلًا. تحقق من الاتصال ثم جرّب مرة أخرى.')),ms))]);
   async function session(){const r=await withTimeout(client.auth.getSession(),12000,'فحص الجلسة');if(r.error)throw r.error;return r.data.session||null}
-  async function profile(userId){const r=await client.from('profiles').select('id,username,display_name,bio,avatar_url,created_at').eq('id',userId).maybeSingle();if(r.error)throw r.error;return r.data||null}
+  async function profile(userId){const r=await withTimeout(client.from('profiles').select('id,username,display_name,bio,avatar_url,created_at').eq('id',userId).maybeSingle(),12000,'تحميل بيانات الحساب');if(r.error)throw r.error;return r.data||null}
   async function signUp(username,password,displayName){
     const u=cleanUsername(username); if(!usernameOk(u)) throw new Error('اسم المستخدم يجب أن يكون 3-24 حرفًا بالإنجليزية أو أرقام أو _.');
     if(!passwordOk(password)) throw new Error('كلمة المرور يجب أن تكون 8 أحرف على الأقل.');
@@ -38,7 +38,7 @@
     if(r.error)throw r.error;
     return {session:r.data.session,profile:await profile(r.data.user.id)};
   }
-  async function ensureSession(){const s=await session();if(!s) return null;const p=await profile(s.user.id);return p?{session:s,profile:p}:null}
+  async function ensureSession(){const s=await session();if(!s)return null;const p=await withTimeout(profile(s.user.id),12000,'تحميل بيانات الحساب');return p?{session:s,profile:p}:null}
   async function signOut(){await client.auth.signOut()}
   async function saveProject(id,data){
     const s=await session(); if(!s)throw new Error('انتهت الجلسة.');
