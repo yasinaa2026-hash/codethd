@@ -37,15 +37,18 @@ const {data:{session}}=await supabase.auth.getSession();if(!session){location.hr
 const me=session.user.id;
 function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
 function followState(){return supabase.from('follows').select('following_id').eq('follower_id',me)}
-async function renderUsers(rows){
+async function renderUsers(userRows, projectRows, ownerMap){
   const {data:following=[]}=await followState();
   const ids=new Set(following.map(x=>x.following_id));
-  $('results').innerHTML=rows.length?rows.map(u=>'<article class="card"><div class="user"><img class="avatar" src="'+esc(u.avatar_url||'')+'" alt=""><div class="user-info"><div class="name"><strong>'+esc(u.display_name||u.username)+'</strong><span class="username">@'+esc(u.username)+'</span></div><div class="bio">'+esc(u.bio||'عضو في Codethd')+'</div><div class="meta"><span><i class="fa-solid fa-user"></i> عضو</span><span><i class="fa-solid fa-code"></i> Codethd</span></div><div class="actions2"><button class="btn primary profileBtn" data-id="'+u.id+'"><i class="fa-solid fa-user"></i> الملف</button><button class="btn '+(ids.has(u.id)?'following':'')+' followBtn" data-id="'+u.id+'"><i class="fa-solid fa-'+(ids.has(u.id)?'check':'plus')+'"></i> '+(ids.has(u.id)?'متابَع':'متابعة')+'</button></div></div></div></article>').join(''):'<div class="empty"><i class="fa-regular fa-user"></i><h2>لا توجد نتائج</h2><p>جرّب اسم مستخدم آخر.</p></div>';
+  const usersHtml=userRows.length?'<div style="grid-column:1/-1;font-weight:800;margin-top:4px">👤 المستخدمون</div>'+userRows.map(u=>'<article class="card"><div class="user"><img class="avatar" src="'+esc(u.avatar_url||'')+'" alt=""><div class="user-info"><div class="name"><strong>'+esc(u.display_name||u.username)+'</strong><span class="username">@'+esc(u.username)+'</span></div><div class="bio">'+esc(u.bio||'عضو في Codethd')+'</div><div class="meta"><span><i class="fa-solid fa-user"></i> عضو</span></div><div class="actions2"><button class="btn primary profileBtn" data-id="'+u.id+'"><i class="fa-solid fa-user"></i> الملف</button><button class="btn '+(ids.has(u.id)?'following':'')+' followBtn" data-id="'+u.id+'"><i class="fa-solid fa-'+(ids.has(u.id)?'check':'plus')+'"></i> '+(ids.has(u.id)?'متابَع':'متابعة')+'</button></div></div></div></article>').join(''):'';
+  const projectsHtml=projectRows.length?'<div style="grid-column:1/-1;font-weight:800;margin-top:10px">📁 المشاريع</div>'+projectRows.map(p=>{const o=ownerMap[p.user_id]||{};return '<article class="card"><div class="topRow" style="display:flex;justify-content:space-between;gap:10px"><div><h3 style="margin-bottom:4px">'+esc(p.name)+'</h3><div class="username">بواسطة @'+esc(o.username||'مستخدم')+'</div></div><div class="iconBox" style="width:42px;height:42px;border-radius:10px;background:rgba(32,201,151,.1);color:var(--accent);display:grid;place-items:center"><i class="fa-solid fa-code"></i></div></div><p class="bio">مشروع منشور داخل Codethd</p><div class="actions2"><button class="btn primary openProject" data-id="'+p.id+'"><i class="fa-solid fa-eye"></i> مشاهدة المشروع</button>'+(o.id?'<button class="btn profileBtn" data-id="'+o.id+'"><i class="fa-solid fa-user"></i> صاحب المشروع</button>':'')+'</div></article>'}).join(''):'';
+  $('results').innerHTML=usersHtml+projectsHtml || '<div class="empty"><i class="fa-regular fa-face-frown"></i><h2>لا توجد نتائج</h2><p>جرّب اسم مستخدم أو اسم مشروع مختلف.</p></div>';
   bind();
 }
 function bind(){
   document.querySelectorAll('.profileBtn').forEach(b=>b.onclick=()=>openProfile(b.dataset.id));
-  document.querySelectorAll('.followBtn').forEach(b=>b.onclick=async()=>{await toggleFollow(b.dataset.id);search()});
+  document.querySelectorAll('.followBtn').forEach(b=>b.onclick=async()=>{b.disabled=true;await toggleFollow(b.dataset.id);search()});
+  document.querySelectorAll('.openProject').forEach(b=>b.onclick=()=>openProject(b.dataset.id));
 }
 async function toggleFollow(id){
   if(id===me)return;
@@ -54,34 +57,28 @@ async function toggleFollow(id){
   else await supabase.from('follows').insert({follower_id:me,following_id:id});
 }
 async function search(){
-  const q=$('q').value.trim().toLowerCase();$('profile').classList.remove('show');
-  if(!q){$('results').innerHTML='';$('status').textContent='اكتب اسم المستخدم للبحث.';return}
+  const q=$('q').value.trim();
+  $('profile').classList.remove('show');
+  if(!q){$('results').innerHTML='';$('status').textContent='اكتب اسم المستخدم أو اسم المشروع للبحث.';return}
   $('status').textContent='جارٍ البحث...';$('results').innerHTML='';
-  const {data,error}=await supabase.from('profiles').select('id,username,display_name,bio,avatar_url').or('username_norm.ilike.%'+q+'%,display_name.ilike.%'+q+'%').neq('id',me).order('username_norm').limit(20);
-  if(error){$('status').textContent='تعذر تنفيذ البحث: '+error.message;return}
-  $('status').textContent=(data?.length||0)+' نتيجة';renderUsers(data||[]);
-}
-async function openProfile(id){
-  $('results').innerHTML='';$('status').textContent='جارٍ تحميل الملف...';$('profile').classList.add('show');$('profile').innerHTML='<div class="loading">جاري التحميل...</div>';
-  const [pr,proj,followers,following]=await Promise.all([
-    supabase.from('profiles').select('*').eq('id',id).single(),
-    supabase.from('projects').select('id,name,html,css,js,updated_at').eq('user_id',id).order('updated_at',{ascending:false}),
-    supabase.from('follows').select('follower_id',{count:'exact',head:true}).eq('following_id',id),
-    supabase.from('follows').select('following_id',{count:'exact',head:true}).eq('follower_id',id)
+  const pattern='%'+q+'%';
+  const [u1,u2,pr]=await Promise.all([
+    supabase.from('profiles').select('id,username,display_name,bio,avatar_url').ilike('username_norm',pattern).neq('id',me).limit(20),
+    supabase.from('profiles').select('id,username,display_name,bio,avatar_url').ilike('display_name',pattern).neq('id',me).limit(20),
+    supabase.from('projects').select('id,name,updated_at,user_id').ilike('name',pattern).limit(30)
   ]);
-  if(pr.error){$('profile').innerHTML='<div class="empty"><i class="fa-solid fa-circle-exclamation"></i><h2>تعذر فتح الملف</h2><p>'+esc(pr.error.message)+'</p></div>';return}
-  const u=pr.data, followed=(await supabase.from('follows').select('following_id').eq('follower_id',me).eq('following_id',id).maybeSingle()).data;
-  $('profile').innerHTML='<div class="profile-head"><img class="profile-avatar" src="'+esc(u.avatar_url||'')+'" alt=""><div class="profile-body"><div class="profile-top"><div><h2>'+esc(u.display_name||u.username)+'</h2><span class="username">@'+esc(u.username)+'</span></div><button id="profileFollow" class="btn '+(followed?'following':'primary')+'"><i class="fa-solid fa-'+(followed?'check':'plus')+'"></i> '+(followed?'متابَع':'متابعة')+'</button></div><p>'+esc(u.bio||'عضو في مجتمع Codethd.')+'</p><div class="pmeta"><span><i class="fa-solid fa-users"></i> '+(followers.count||0)+' متابع</span><span><i class="fa-solid fa-user-plus"></i> '+(following.count||0)+' يتابع</span><span><i class="fa-solid fa-folder-open"></i> '+(proj.data?.length||0)+' مشروع</span></div></div></div><div class="section"><h3>مشاريع '+esc(u.display_name||u.username)+'</h3>'+((proj.data&&proj.data.length)?'<div class="projects">'+proj.data.map(p=>'<article class="project"><h4>'+esc(p.name)+'</h4><p>مشروع منشور داخل Codethd</p><div class="meta"><span><i class="fa-solid fa-clock"></i> '+new Date(p.updated_at).toLocaleDateString('ar-SA')+'</span></div><button class="btn primary open openProject" data-id="'+p.id+'"><i class="fa-solid fa-eye"></i> مشاهدة</button></article>').join('')+'</div>':'<div class="empty"><i class="fa-regular fa-folder-open"></i><h2>لا توجد مشاريع منشورة</h2></div>')+'</div>';
-  $('profileFollow').onclick=async()=>{await toggleFollow(id);openProfile(id)}
-  document.querySelectorAll('.openProject').forEach(b=>b.onclick=()=>openProject(b.dataset.id));
-  window.scrollTo({top:$('profile').offsetTop-75,behavior:'smooth'});
-  $('status').textContent='';
-}
-async function openProject(id){
- const {data,error}=await supabase.from('projects').select('name,html,css,js').eq('id',id).single();
- if(error){alert('تعذر فتح المشروع');return}
- const srcdoc='<!DOCTYPE html><html><head><meta charset="UTF-8"><style>body{margin:0;font-family:Arial,sans-serif}'+(data.css||'')+'</style></head><body>'+(data.html||'')+'<script>'+String(data.js||'').replace(/<\\/script>/gi,'')+'<\\/script></body></html>';
- const w=window.open('about:blank','_blank');if(w){w.document.write(srcdoc);w.document.close()}
+  const errors=[u1.error,u2.error,pr.error].filter(Boolean);
+  if(errors.length){$('status').textContent='تعذر تنفيذ البحث: '+errors[0].message;return}
+  const map=new Map();
+  [...(u1.data||[]),...(u2.data||[])].forEach(u=>map.set(u.id,u));
+  const users=[...map.values()];
+  const projects=pr.data||[];
+  const ownerIds=[...new Set(projects.map(p=>p.user_id).filter(Boolean))];
+  const {data:owners,error:ownerError}=ownerIds.length?await supabase.from('profiles').select('id,username,display_name,avatar_url').in('id',ownerIds):{data:[],error:null};
+  if(ownerError){$('status').textContent='تعذر تحميل أصحاب المشاريع: '+ownerError.message;return}
+  const ownerMap=Object.fromEntries((owners||[]).map(o=>[o.id,o]));
+  $('status').textContent=(users.length+projects.length)+' نتيجة';
+  renderUsers(users,projects,ownerMap);
 }
 $('searchBtn').onclick=search;$('q').onkeydown=e=>{if(e.key==='Enter')search()};
 $('theme').onclick=()=>{const light=document.body.classList.toggle('light');localStorage.setItem('codethd-theme',light?'light-mode':'dark-mode');$('theme').textContent=light?'☀️':'🌙'};
