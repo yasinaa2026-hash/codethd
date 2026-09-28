@@ -18,9 +18,14 @@
     if(m.includes('email')&&m.includes('confirm')) return 'تأكيد البريد الإلكتروني مفعّل في إعدادات الحساب. عطّله ليعمل دخول Codethd بدون بريد.';
     return e?.message||'حدث خطأ غير متوقع.';
   };
-  const withTimeout=(promise,ms=12000,label='الطلب')=>Promise.race([promise,new Promise((_,reject)=>setTimeout(()=>reject(new Error(label+' استغرق وقتًا طويلًا. تحقق من الاتصال ثم جرّب مرة أخرى.')),ms))]);
-  async function session(){const r=await withTimeout(client.auth.getSession(),12000,'فحص الجلسة');if(r.error)throw r.error;return r.data.session||null}
-  async function profile(userId){const r=await withTimeout(client.from('profiles').select('id,username,display_name,bio,avatar_url,created_at').eq('id',userId).maybeSingle(),12000,'تحميل بيانات الحساب');if(r.error)throw r.error;return r.data||null}
+  const withTimeout=(promise,ms=6000,label='الطلب')=>Promise.race([promise,new Promise((_,reject)=>setTimeout(()=>reject(new Error(label+' استغرق وقتًا طويلًا. تحقق من الاتصال ثم جرّب مرة أخرى.')),ms))]);
+  async function session(){const r=await withTimeout(client.auth.getSession(),6000,'فحص الجلسة');if(r.error)throw r.error;return r.data.session||null}
+  function quickProfile(user){
+    const m=user?.user_metadata||{};
+    const fallback=String(user?.email||'').split('@')[0]||'codethd_user';
+    return {id:user?.id||'',username:String(m.username||fallback).toLowerCase(),display_name:String(m.display_name||m.username||fallback),bio:String(m.bio||''),avatar_url:m.avatar_url||null,created_at:user?.created_at||null};
+  }
+  async function profile(userId){const r=await withTimeout(client.from('profiles').select('id,username,display_name,bio,avatar_url,created_at').eq('id',userId).maybeSingle(),6000,'تحميل بيانات الحساب');if(r.error)throw r.error;return r.data||null}
   async function signUp(username,password,displayName){
     const u=cleanUsername(username); if(!usernameOk(u)) throw new Error('اسم المستخدم يجب أن يكون 3-24 حرفًا بالإنجليزية أو أرقام أو _.');
     if(!passwordOk(password)) throw new Error('كلمة المرور يجب أن تكون 8 أحرف على الأقل.');
@@ -28,17 +33,16 @@
     const r=await withTimeout(client.auth.signUp({email,password,options:{data:{username:u,display_name:(displayName||u).trim()}}}),12000,'إنشاء الحساب');
     if(r.error)throw r.error;
     if(!r.data.session) throw new Error('تم إنشاء الحساب، لكن تأكيد البريد مفعّل. عطّل Confirm email في إعدادات Authentication.');
-    const p=await withTimeout(profile(r.data.user.id),12000,'تحميل الحساب');
-    return {session:r.data.session,profile:p};
+    return {session:r.data.session,profile:quickProfile(r.data.user)};
   }
   async function signIn(username,password){
     const u=cleanUsername(username); if(!usernameOk(u)) throw new Error('اسم المستخدم غير صالح.');
     if(!passwordOk(password)) throw new Error('كلمة المرور يجب أن تكون 8 أحرف على الأقل.');
     const r=await withTimeout(client.auth.signInWithPassword({email:emailForUsername(u),password}),12000,'تسجيل الدخول');
     if(r.error)throw r.error;
-    return {session:r.data.session,profile:await profile(r.data.user.id)};
+    return {session:r.data.session,profile:quickProfile(r.data.user)};
   }
-  async function ensureSession(){const s=await session();if(!s)return null;const p=await withTimeout(profile(s.user.id),12000,'تحميل بيانات الحساب');return p?{session:s,profile:p}:null}
+  async function ensureSession(){const s=await session();if(!s)return null;return {session:s,profile:quickProfile(s.user)}}
   async function signOut(){await client.auth.signOut()}
   async function saveProject(id,data){
     const s=await session(); if(!s)throw new Error('انتهت الجلسة.');
@@ -105,5 +109,5 @@
     const r=await client.from('profiles').update(data).eq('id',s.user.id).select('id,username,display_name,bio,avatar_url').single();
     if(r.error)throw r.error;return r.data;
   }
-  window.CodeTHDCloud={client,emailForUsername,usernameOk,passwordOk,errorText,session,profile,signUp,signIn,ensureSession,signOut,saveProject,ownProjects,userProjects,project,deleteProject,searchPeople,allPeople,peopleProjects,followed,isFollowing,toggleFollow,stats,updateProfile};
+  window.CodeTHDCloud={client,emailForUsername,usernameOk,passwordOk,errorText,session,quickProfile,profile,signUp,signIn,ensureSession,signOut,saveProject,ownProjects,userProjects,project,deleteProject,searchPeople,allPeople,peopleProjects,followed,isFollowing,toggleFollow,stats,updateProfile};
 })();
