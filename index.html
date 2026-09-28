@@ -387,8 +387,8 @@
             }
         }
     </style>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="supabase-config.js?v=20260928"></script></head>
-<body class="dark-mode green-code"><script>window.CODETHD_AUTH_READY=(async()=>{try{if(!window.CODETHD_SUPABASE_URL||!window.CODETHD_SUPABASE_KEY){location.href="auth.html";return null}window.CODETHD_SUPABASE_CLIENT=window.supabase.createClient(window.CODETHD_SUPABASE_URL,window.CODETHD_SUPABASE_KEY);const {data,error}=await window.CODETHD_SUPABASE_CLIENT.auth.getSession();if(error||!data.session){location.href="auth.html";return null}window.CODETHD_SESSION=data.session;return data.session}catch(e){console.error(e);location.href="auth.html";return null}})();</script>
+</head>
+<body class="dark-mode green-code"><script src="codethd-local.js?v=20260928.1"></script><script>window.CODETHD_AUTH_READY=Promise.resolve(CodeTHD.ensure());window.CODETHD_SESSION=CodeTHD.getCurrent();</script>
 
     <div id="particles"></div>
 
@@ -708,76 +708,33 @@
             const html = htmlEditor.getValue();
             const css = cssEditor.getValue();
             const js = jsEditor.getValue();
-            const sb = window.CODETHD_SUPABASE_CLIENT;
-            const session = window.CODETHD_SESSION;
-            if (!sb || !session) {
-                showNotification('سجّل الدخول أولًا! ❌');
+            const activeId = localStorage.getItem('codethd-active-project-id');
+            let project = activeId ? CodeTHD.updateProject(activeId,{html,css,js}) : null;
+            if (!project) {
+                project = CodeTHD.createProject({name:'مشروع Codethd',html,css,js});
+                if(project) localStorage.setItem('codethd-active-project-id',project.id);
+            }
+            if (!project) {
+                showNotification('تعذر حفظ المشروع! ❌');
                 return;
             }
-
-            const activeId = localStorage.getItem('codethd-active-project-id');
-            let result;
-
-            if (activeId) {
-                const update = await sb.from('projects')
-                    .update({ html, css, js })
-                    .eq('id', activeId)
-                    .eq('user_id', session.user.id)
-                    .select('id')
-                    .maybeSingle();
-                if (update.error) {
-                    console.error(update.error);
-                    showNotification('تعذر حفظ المشروع! ❌');
-                    return;
-                }
-                result = update.data;
-            }
-
-            if (!result) {
-                const insert = await sb.from('projects')
-                    .insert({
-                        user_id: session.user.id,
-                        name: 'مشروع Codethd',
-                        html, css, js
-                    })
-                    .select('id')
-                    .single();
-                if (insert.error) {
-                    console.error(insert.error);
-                    showNotification('تعذر حفظ المشروع! ❌');
-                    return;
-                }
-                result = insert.data;
-                localStorage.setItem('codethd-active-project-id', result.id);
-            }
-
             await saveCodeToLocalStorage();
             createParticles(18, 'sparkles');
-            showNotification('تم حفظ المشروع في حسابك ✓');
+            showNotification('تم حفظ المشروع في حساب '+CodeTHD.getCurrent().username+' ✓');
         }
 
         async function loadCodeFromLocalStorage() {
-            const sb = window.CODETHD_SUPABASE_CLIENT;
-            const session = window.CODETHD_SESSION;
             let loaded = false;
-
-            if (sb && session) {
-                const activeId = localStorage.getItem('codethd-active-project-id');
-                if (activeId) {
-                    const { data } = await sb.from('projects')
-                        .select('id,html,css,js')
-                        .eq('id', activeId)
-                        .eq('user_id', session.user.id)
-                        .maybeSingle();
-                    if (data) {
-                        htmlEditor.setValue(data.html || '');
-                        cssEditor.setValue(data.css || '');
-                        jsEditor.setValue(data.js || '');
-                        loaded = true;
-                    }
+            const activeId = localStorage.getItem('codethd-active-project-id');
+            if (activeId) {
+                const data = CodeTHD.getProject(activeId);
+                if (data && data.userId === CodeTHD.getCurrent().id) {
+                    htmlEditor.setValue(data.html || '');
+                    cssEditor.setValue(data.css || '');
+                    jsEditor.setValue(data.js || '');
+                    loaded = true;
                 }
             }
-
             if (!loaded) {
                 const savedHtml = localStorage.getItem('codethd-html');
                 const savedCss = localStorage.getItem('codethd-css');
@@ -786,7 +743,6 @@
                 if (savedCss !== null) cssEditor.setValue(savedCss);
                 if (savedJs !== null) jsEditor.setValue(savedJs);
             }
-
             updatePreview();
         }
 
@@ -1035,10 +991,12 @@
         }
 
         async function initApp() {
-            const session = await window.CODETHD_AUTH_READY;
+            const session = CodeTHD.ensure();
             if (!session) return;
             initTheme();
             initLayout();
+            const userBtn=document.getElementById('authUserBtn');
+            if(userBtn){ userBtn.innerHTML='<i class="fa-solid fa-user"></i> <span>'+String(session.displayName||session.username)+'</span>'; userBtn.title='الحساب @'+session.username; }
             initEditors();
             await loadCodeFromLocalStorage();
             setupMobileTabs();
