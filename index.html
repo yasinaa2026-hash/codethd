@@ -388,7 +388,7 @@
         }
     </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="supabase-config.js"></script></head>
-<body class="dark-mode green-code"><script>window.CODETHD_AUTH_GUARD=true;(async()=>{try{if(!window.CODETHD_SUPABASE_URL||!window.CODETHD_SUPABASE_KEY){location.href="auth.html";return}const sb=window.supabase.createClient(window.CODETHD_SUPABASE_URL,window.CODETHD_SUPABASE_KEY);const {data}=await sb.auth.getSession();if(!data.session)location.href="auth.html";else window.CODETHD_SESSION=data.session}catch(e){console.error(e);location.href="auth.html"}})();</script>
+<body class="dark-mode green-code"><script>window.CODETHD_AUTH_READY=(async()=>{try{if(!window.CODETHD_SUPABASE_URL||!window.CODETHD_SUPABASE_KEY){location.href="auth.html";return null}window.CODETHD_SUPABASE_CLIENT=window.supabase.createClient(window.CODETHD_SUPABASE_URL,window.CODETHD_SUPABASE_KEY);const {data,error}=await window.CODETHD_SUPABASE_CLIENT.auth.getSession();if(error||!data.session){location.href="auth.html";return null}window.CODETHD_SESSION=data.session;return data.session}catch(e){console.error(e);location.href="auth.html";return null}})();</script>
 
     <div id="particles"></div>
 
@@ -698,67 +698,95 @@
             showNotification('تم مسح السجل! ✓');
         });
 
-        function saveCodeToLocalStorage() {
+        async function saveCodeToLocalStorage() {
             localStorage.setItem('codethd-html', htmlEditor.getValue());
             localStorage.setItem('codethd-css', cssEditor.getValue());
             localStorage.setItem('codethd-js', jsEditor.getValue());
         }
 
-        function saveCurrentProject() {
+        async function saveCurrentProject() {
             const html = htmlEditor.getValue();
             const css = cssEditor.getValue();
             const js = jsEditor.getValue();
+            const sb = window.CODETHD_SUPABASE_CLIENT;
+            const session = window.CODETHD_SESSION;
+            if (!sb || !session) {
+                showNotification('سجّل الدخول أولًا! ❌');
+                return;
+            }
 
-            const projects = JSON.parse(localStorage.getItem('codethd-projects') || '[]');
             const activeId = localStorage.getItem('codethd-active-project-id');
-            const now = new Date().toLocaleString('ar-SA');
+            let result;
 
             if (activeId) {
-                const existingIndex = projects.findIndex(project => project.id === activeId);
-
-                if (existingIndex !== -1) {
-                    projects[existingIndex] = {
-                        ...projects[existingIndex],
-                        html,
-                        css,
-                        js,
-                        date: now
-                    };
-                    localStorage.setItem('codethd-projects', JSON.stringify(projects));
-                    saveCodeToLocalStorage();
-                    createParticles(18, 'sparkles');
-                    showNotification('تم حفظ المشروع وتحديثه! ✓');
+                const update = await sb.from('projects')
+                    .update({ html, css, js })
+                    .eq('id', activeId)
+                    .eq('user_id', session.user.id)
+                    .select('id')
+                    .maybeSingle();
+                if (update.error) {
+                    console.error(update.error);
+                    showNotification('تعذر حفظ المشروع! ❌');
                     return;
+                }
+                result = update.data;
+            }
+
+            if (!result) {
+                const insert = await sb.from('projects')
+                    .insert({
+                        user_id: session.user.id,
+                        name: 'مشروع Codethd',
+                        html, css, js
+                    })
+                    .select('id')
+                    .single();
+                if (insert.error) {
+                    console.error(insert.error);
+                    showNotification('تعذر حفظ المشروع! ❌');
+                    return;
+                }
+                result = insert.data;
+                localStorage.setItem('codethd-active-project-id', result.id);
+            }
+
+            await saveCodeToLocalStorage();
+            createParticles(18, 'sparkles');
+            showNotification('تم حفظ المشروع في حسابك ✓');
+        }
+
+        async function loadCodeFromLocalStorage() {
+            const sb = window.CODETHD_SUPABASE_CLIENT;
+            const session = window.CODETHD_SESSION;
+            let loaded = false;
+
+            if (sb && session) {
+                const activeId = localStorage.getItem('codethd-active-project-id');
+                if (activeId) {
+                    const { data } = await sb.from('projects')
+                        .select('id,html,css,js')
+                        .eq('id', activeId)
+                        .eq('user_id', session.user.id)
+                        .maybeSingle();
+                    if (data) {
+                        htmlEditor.setValue(data.html || '');
+                        cssEditor.setValue(data.css || '');
+                        jsEditor.setValue(data.js || '');
+                        loaded = true;
+                    }
                 }
             }
 
-            const project = {
-                id: (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : String(Date.now()),
-                name: 'مشروع Codethd',
-                html,
-                css,
-                js,
-                date: now
-            };
+            if (!loaded) {
+                const savedHtml = localStorage.getItem('codethd-html');
+                const savedCss = localStorage.getItem('codethd-css');
+                const savedJs = localStorage.getItem('codethd-js');
+                if (savedHtml !== null) htmlEditor.setValue(savedHtml);
+                if (savedCss !== null) cssEditor.setValue(savedCss);
+                if (savedJs !== null) jsEditor.setValue(savedJs);
+            }
 
-            projects.unshift(project);
-            localStorage.setItem('codethd-projects', JSON.stringify(projects));
-            localStorage.setItem('codethd-active-project-id', project.id);
-            saveCodeToLocalStorage();
-
-            createParticles(18, 'sparkles');
-            showNotification('تم حفظ المشروع! ✓');
-        }
-
-        function loadCodeFromLocalStorage() {
-            const savedHtml = localStorage.getItem('codethd-html');
-            const savedCss = localStorage.getItem('codethd-css');
-            const savedJs = localStorage.getItem('codethd-js');
-            
-            if (savedHtml !== null) htmlEditor.setValue(savedHtml);
-            if (savedCss !== null) cssEditor.setValue(savedCss);
-            if (savedJs !== null) jsEditor.setValue(savedJs);
-            
             updatePreview();
         }
 
@@ -1006,11 +1034,13 @@
             }, 2000);
         }
 
-        function initApp() {
+        async function initApp() {
+            const session = await window.CODETHD_AUTH_READY;
+            if (!session) return;
             initTheme();
             initLayout();
             initEditors();
-            loadCodeFromLocalStorage();
+            await loadCodeFromLocalStorage();
             setupMobileTabs();
             setTimeout(setupConsoleInterception, 200);
             createParticles(5, 'stars');
