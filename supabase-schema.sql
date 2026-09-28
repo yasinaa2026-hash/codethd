@@ -52,9 +52,12 @@ declare
   v_username_norm text;
   v_display_name text;
 begin
-  v_username := coalesce(new.raw_user_meta_data ->> 'username', split_part(new.email, '@', 1));
+  v_username := trim(coalesce(new.raw_user_meta_data ->> 'username', ''));
+  if v_username = '' then
+    v_username := 'user_' || substr(replace(new.id::text, '-', ''), 1, 10);
+  end if;
   v_username_norm := lower(trim(v_username));
-  v_display_name := coalesce(new.raw_user_meta_data ->> 'display_name', v_username);
+  v_display_name := coalesce(nullif(trim(new.raw_user_meta_data ->> 'display_name'), ''), v_username);
 
   insert into public.profiles (id, username, username_norm, display_name)
   values (new.id, left(trim(v_username), 30), left(v_username_norm, 30), left(trim(v_display_name), 80))
@@ -163,3 +166,7 @@ grant usage on schema public to authenticated;
 grant select, update on public.profiles to authenticated;
 grant select, insert, update, delete on public.projects to authenticated;
 grant select, insert, delete on public.follows to authenticated;
+
+
+-- ملاحظة: Supabase Anonymous Users تستخدم role = authenticated.
+-- لذلك سيعمل معها RLS أعلاه. فعّل Allow anonymous sign-ins من Authentication.
