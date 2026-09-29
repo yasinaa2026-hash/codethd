@@ -55,7 +55,7 @@
   }
   async function ownProjects(){
     const s=await session();if(!s)return [];
-    const r=await client.from('projects').select('id,name,html,css,js,updated_at,user_id').eq('user_id',s.user.id).order('updated_at',{ascending:false});
+    const r=await withTimeout(client.from('projects').select('id,name,html,css,js,updated_at,user_id').eq('user_id',s.user.id).order('updated_at',{ascending:false}),7000,'تحميل المشاريع');
     if(r.error)throw r.error;return r.data||[];
   }
   async function userProjects(userId){const r=await withTimeout(client.from('projects').select('id,name,html,css,js,updated_at,user_id').eq('user_id',userId).order('updated_at',{ascending:false}),7000,'تحميل المشاريع');if(r.error)throw r.error;return r.data||[]}
