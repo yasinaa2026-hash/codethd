@@ -43,7 +43,7 @@
     return {session:r.data.session,profile:quickProfile(r.data.user)};
   }
   async function ensureSession(){const s=await session();if(!s)return null;return {session:s,profile:quickProfile(s.user)}}
-  async function signOut(){await client.auth.signOut()}
+  async function signOut(){await withTimeout(client.auth.signOut(),7000,'تسجيل الخروج')}
   async function saveProject(id,data){
     const s=await session(); if(!s)throw new Error('انتهت الجلسة.');
     if(id){
@@ -65,48 +65,48 @@
     const s=await session();if(!s)return [];
     const term='%'+String(q||'').trim()+'%';
     const [a,b]=await Promise.all([
-      client.from('profiles').select('id,username,display_name,bio,avatar_url,created_at').ilike('username_norm',term).neq('id',s.user.id).limit(60),
-      client.from('profiles').select('id,username,display_name,bio,avatar_url,created_at').ilike('display_name',term).neq('id',s.user.id).limit(60)
+      withTimeout(client.from('profiles').select('id,username,display_name,bio,avatar_url,created_at').ilike('username_norm',term).neq('id',s.user.id).limit(60),7000,'البحث عن المستخدمين'),
+      withTimeout(client.from('profiles').select('id,username,display_name,bio,avatar_url,created_at').ilike('display_name',term).neq('id',s.user.id).limit(60),7000,'البحث عن المستخدمين')
     ]);
     if(a.error)throw a.error;if(b.error)throw b.error;
     const map=new Map();[...(a.data||[]),...(b.data||[])].forEach(x=>map.set(x.id,x));return [...map.values()];
   }
   async function allPeople(){
     const s=await session();if(!s)return [];
-    const r=await client.from('profiles').select('id,username,display_name,bio,avatar_url,created_at').neq('id',s.user.id).order('created_at',{ascending:false}).limit(100);
+    const r=await withTimeout(client.from('profiles').select('id,username,display_name,bio,avatar_url,created_at').neq('id',s.user.id).order('created_at',{ascending:false}).limit(100),7000,'تحميل أعضاء المجتمع');
     if(r.error)throw r.error;return r.data||[];
   }
   async function peopleProjects(q){
     const s=await session();if(!s)return [];
     const term='%'+String(q||'').trim()+'%';
-    const r=await client.from('projects').select('id,name,updated_at,user_id').ilike('name',term).neq('user_id',s.user.id).limit(60);
+    const r=await withTimeout(client.from('projects').select('id,name,updated_at,user_id').ilike('name',term).neq('user_id',s.user.id).limit(60),7000,'البحث عن المشاريع');
     if(r.error)throw r.error;return r.data||[];
   }
   async function followed(){
     const s=await session();if(!s)return [];
-    const r=await client.from('follows').select('following_id').eq('follower_id',s.user.id);if(r.error)throw r.error;
+    const r=await withTimeout(client.from('follows').select('following_id').eq('follower_id',s.user.id),7000,'تحميل المتابَعين');if(r.error)throw r.error;
     const ids=(r.data||[]).map(x=>x.following_id);if(!ids.length)return [];
-    const p=await client.from('profiles').select('id,username,display_name,bio,avatar_url,created_at').in('id',ids);
+    const p=await withTimeout(client.from('profiles').select('id,username,display_name,bio,avatar_url,created_at').in('id',ids),7000,'تحميل الأصدقاء');
     if(p.error)throw p.error;return p.data||[];
   }
-  async function isFollowing(id){const s=await session();if(!s)return false;const r=await client.from('follows').select('following_id').eq('follower_id',s.user.id).eq('following_id',id).maybeSingle();if(r.error)throw r.error;return !!r.data}
+  async function isFollowing(id){const s=await session();if(!s)return false;const r=await withTimeout(client.from('follows').select('following_id').eq('follower_id',s.user.id).eq('following_id',id).maybeSingle(),7000,'فحص المتابعة');if(r.error)throw r.error;return !!r.data}
   async function toggleFollow(id){
     const s=await session();if(!s||id===s.user.id)return false;
     const yes=await isFollowing(id);
-    if(yes){const r=await client.from('follows').delete().eq('follower_id',s.user.id).eq('following_id',id);if(r.error)throw r.error;return false}
-    const r=await client.from('follows').insert({follower_id:s.user.id,following_id:id});if(r.error)throw r.error;return true;
+    if(yes){const r=await withTimeout(client.from('follows').delete().eq('follower_id',s.user.id).eq('following_id',id),7000,'إلغاء المتابعة');if(r.error)throw r.error;return false}
+    const r=await withTimeout(client.from('follows').insert({follower_id:s.user.id,following_id:id}),7000,'متابعة المستخدم');if(r.error)throw r.error;return true;
   }
   async function stats(id){const [followers,following,projects]=await Promise.all([
-    client.from('follows').select('*',{count:'exact',head:true}).eq('following_id',id),
-    client.from('follows').select('*',{count:'exact',head:true}).eq('follower_id',id),
-    client.from('projects').select('*',{count:'exact',head:true}).eq('user_id',id)
+    withTimeout(client.from('follows').select('*',{count:'exact',head:true}).eq('following_id',id),7000,'حساب المتابعين'),
+    withTimeout(client.from('follows').select('*',{count:'exact',head:true}).eq('follower_id',id),7000,'حساب المتابَعين'),
+    withTimeout(client.from('projects').select('*',{count:'exact',head:true}).eq('user_id',id),7000,'حساب المشاريع')
   ]);
   if(followers.error)throw followers.error;if(following.error)throw following.error;if(projects.error)throw projects.error;
   return {followers:followers.count||0,following:following.count||0,projects:projects.count||0};
   }
   async function updateProfile(data){
     const s=await session();if(!s)throw new Error('انتهت الجلسة.');
-    const r=await client.from('profiles').update(data).eq('id',s.user.id).select('id,username,display_name,bio,avatar_url').single();
+    const r=await withTimeout(client.from('profiles').update(data).eq('id',s.user.id).select('id,username,display_name,bio,avatar_url').single(),7000,'تحديث الحساب');
     if(r.error)throw r.error;return r.data;
   }
   window.CodeTHDCloud={client,emailForUsername,usernameOk,passwordOk,errorText,session,quickProfile,profile,signUp,signIn,ensureSession,signOut,saveProject,ownProjects,userProjects,project,deleteProject,searchPeople,allPeople,peopleProjects,followed,isFollowing,toggleFollow,stats,updateProfile};
