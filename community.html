@@ -28,12 +28,12 @@ main{max-width:1120px;margin:0 auto;padding:32px 20px 60px}.hero{text-align:cent
 <section id="profile" class="profile"></section>
 <section id="results" class="results"></section>
 </main>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="codethd-config.js?v=20260928.2"></script><script src="codethd-supabase.js?v=20260929.1"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="codethd-config.js?v=20260928.2"></script><script src="codethd-supabase.js?v=20260929.3"></script>
 <script>
 (async function(){
   const $=id=>document.getElementById(id);
-  const state=await CodeTHDCloud.ensureSession();
-  if(!state){location.href='auth.html';return}
+  const state=await CodeTHDCloud.ensureSession().catch(e=>({error:e}));
+  if(!state || state.error){ $('status').textContent=state?.error?CodeTHDCloud.errorText(state.error):'يرجى تسجيل الدخول لفتح المجتمع.'; return}
   const me=state.profile;
   const gradients=[
     'linear-gradient(135deg,#20c997,#0f766e,#111827)','linear-gradient(135deg,#6366f1,#8b5cf6,#ec4899)',
