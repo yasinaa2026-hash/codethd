@@ -1,67 +1,160 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>مشاريعي - Codethd</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>مشاريع Codethd</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🦊</text></svg>">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
-:root{--bg:#121212;--panel:#1e1e1e;--header:#181818;--text:#e0e0e0;--muted:#9ca3af;--border:#2a2a2a;--accent:#20c997;--hover:#12b886;--danger:#ff6b6b}
-body.light{--bg:#f8f9fa;--panel:#fff;--header:#e9ecef;--text:#212529;--muted:#6c757d;--border:#dee2e6;--accent:#0ca678;--hover:#099268}
-*{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',Tahoma,sans-serif}body{min-height:100vh;background:var(--bg);color:var(--text)}
-header{height:64px;background:var(--header);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:sticky;top:0;z-index:10}.logo{display:flex;align-items:center;gap:10px;color:var(--accent);font-size:1.2rem;font-weight:800}.actions{display:flex;gap:7px;align-items:center}.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;text-decoration:none;background:var(--panel);color:var(--text);border:1px solid var(--border);padding:8px 12px;border-radius:8px;cursor:pointer;font-weight:700}.btn:hover{border-color:var(--accent);color:var(--accent)}.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}.btn.danger{color:var(--danger)}.btn.danger:hover{background:var(--danger);border-color:var(--danger);color:#fff}
-main{max-width:1120px;margin:0 auto;padding:34px 20px 60px}.hero{text-align:center;margin-bottom:25px}.hero-icon{width:74px;height:74px;border-radius:20px;background:rgba(32,201,151,.1);color:var(--accent);display:grid;place-items:center;margin:0 auto 14px;font-size:31px}h1{font-size:1.95rem;margin-bottom:7px}.hero p{color:var(--muted)}
-.toolbar{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:15px}.count{color:var(--muted);font-size:.85rem}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}.card{background:var(--panel);border:1px solid var(--border);border-radius:13px;padding:16px}.card:hover{border-color:rgba(32,201,151,.55);transform:translateY(-2px);transition:.2s}.top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;margin-bottom:13px}.icon{width:43px;height:43px;border-radius:10px;background:rgba(32,201,151,.1);display:grid;place-items:center;color:var(--accent)}h3{font-size:1.03rem;margin-bottom:5px;word-break:break-word}.date{color:var(--muted);font-size:.76rem}.preview{height:120px;background:#fff;border:1px solid var(--border);border-radius:9px;overflow:hidden;margin:10px 0 13px}.preview iframe{width:100%;height:100%;border:0}.card-actions{display:flex;gap:7px}.card-actions .btn{flex:1}.empty{padding:50px 20px;text-align:center;border:1px dashed var(--border);border-radius:13px;background:var(--panel)}.empty i{font-size:36px;color:var(--accent);margin-bottom:12px}.empty h2{font-size:1.18rem;margin-bottom:6px}.empty p{color:var(--muted);line-height:1.6;margin-bottom:15px}.msg{color:var(--muted);font-size:.84rem;min-height:23px;margin-bottom:9px}.loading{text-align:center;color:var(--muted);padding:30px}
+:root{--bg:#121212;--panel:#1e1e1e;--header:#181818;--text:#e0e0e0;--muted:#9ca3af;--border:#2a2a2a;--accent:#20c997;--danger:#ff6b6b}
+body.light{--bg:#f8f9fa;--panel:#fff;--header:#e9ecef;--text:#212529;--muted:#6c757d;--border:#dee2e6;--accent:#0ca678;--danger:#e03131}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',Tahoma,sans-serif}
+body{min-height:100vh;background:var(--bg);color:var(--text)}
+header{height:64px;background:var(--header);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:sticky;top:0;z-index:10}
+.logo{display:flex;align-items:center;gap:10px;color:var(--accent);font-size:1.2rem;font-weight:800}
+.actions{display:flex;gap:7px;align-items:center}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;text-decoration:none;background:var(--panel);color:var(--text);border:1px solid var(--border);padding:8px 12px;border-radius:8px;cursor:pointer;font-weight:700}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.danger{color:var(--danger)}
+.btn.danger:hover{background:var(--danger);border-color:var(--danger);color:#fff}
+main{max-width:1120px;margin:0 auto;padding:34px 20px 60px}
+.hero{text-align:center;margin-bottom:25px}
+.hero-icon{width:74px;height:74px;border-radius:20px;background:rgba(32,201,151,.1);color:var(--accent);display:grid;place-items:center;margin:0 auto 14px;font-size:31px}
+h1{font-size:1.95rem;margin-bottom:7px}.hero p{color:var(--muted)}
+.toolbar{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:15px}
+.count{color:var(--muted);font-size:.85rem}
+.msg{color:var(--muted);font-size:.84rem;min-height:23px;margin-bottom:9px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:13px;padding:16px;transition:.2s}
+.card:hover{border-color:rgba(32,201,151,.55);transform:translateY(-2px)}
+.top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;margin-bottom:13px}
+.icon{width:43px;height:43px;border-radius:10px;background:rgba(32,201,151,.1);display:grid;place-items:center;color:var(--accent)}
+h3{font-size:1.03rem;margin-bottom:5px;word-break:break-word}
+.owner,.date{color:var(--muted);font-size:.76rem}
+.preview{height:170px;background:#fff;border:1px solid var(--border);border-radius:9px;overflow:hidden;margin:10px 0 13px}
+.preview iframe{width:100%;height:100%;border:0}
+.card-actions{display:flex;gap:7px}.card-actions .btn{flex:1}
+.empty{padding:50px 20px;text-align:center;border:1px dashed var(--border);border-radius:13px;background:var(--panel)}
+.empty i{font-size:36px;color:var(--accent);margin-bottom:12px}.empty h2{font-size:1.18rem;margin-bottom:6px}
+.empty p{color:var(--muted);line-height:1.6;margin-bottom:15px}
+.loading{text-align:center;color:var(--muted);padding:30px}
 @media(max-width:650px){header{padding:0 10px}.hide-mobile{display:none}main{padding:27px 12px 45px}.toolbar{align-items:stretch;flex-direction:column}}
 </style>
 </head>
 <body>
-<header><div class="logo"><i class="fa-solid fa-code"></i><span>Codethd</span></div><div class="actions"><a class="btn" href="community.html"><i class="fa-solid fa-user-group"></i><span class="hide-mobile">الأصدقاء</span></a><a class="btn" href="index.html"><i class="fa-solid fa-code"></i><span class="hide-mobile">المحرر</span></a><button class="btn" id="logout"><i class="fa-solid fa-right-from-bracket"></i><span class="hide-mobile">خروج</span></button><button class="btn" id="theme">🌙</button></div></header>
-<main><section class="hero"><div class="hero-icon"><i class="fa-solid fa-folder-open"></i></div><h1>مشاريعي</h1><p>كل مشاريعك محفوظة داخل Codethd على هذا المتصفح.</p></section>
-<div class="toolbar"><span class="count" id="count"></span><a class="btn primary" href="index.html"><i class="fa-solid fa-plus"></i> مشروع جديد</a></div><div id="msg" class="msg"></div><section id="projects"></section></main>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="codethd-config.js?v=20260928.2"></script><script src="codethd-supabase.js?v=20260929.1"></script>
+<header>
+  <div class="logo"><i class="fa-solid fa-code"></i><span>Codethd</span></div>
+  <div class="actions">
+    <a class="btn" href="community.html"><i class="fa-solid fa-user-group"></i><span class="hide-mobile">الأصدقاء</span></a>
+    <a class="btn" href="index.html"><i class="fa-solid fa-code"></i><span class="hide-mobile">المحرر</span></a>
+    <button class="btn" id="logout"><i class="fa-solid fa-right-from-bracket"></i><span class="hide-mobile">خروج</span></button>
+    <button class="btn" id="theme" type="button">🌙</button>
+  </div>
+</header>
+<main>
+  <section class="hero">
+    <div class="hero-icon"><i class="fa-solid fa-folder-open"></i></div>
+    <h1>مشاريع Codethd</h1>
+    <p id="subtitle">مشاريعك المحفوظة ومشاريع المستخدم الذي اخترته من المجتمع.</p>
+  </section>
+  <div class="toolbar">
+    <span class="count" id="count"></span>
+    <a class="btn primary" href="index.html"><i class="fa-solid fa-plus"></i> مشروع جديد</a>
+  </div>
+  <div id="msg" class="msg"></div>
+  <section id="projects"></section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="codethd-config.js?v=20260928.2"></script>
+<script src="codethd-supabase.js?v=20260929.3"></script>
 <script>
-(function(){
- const me=CodeTHD.ensure(),el=document.getElementById('projects'),count=document.getElementById('count'),msg=document.getElementById('msg');
- const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
- const viewId=localStorage.getItem('codethd-view-project-id');
- function renderProject(p,editable){
-  const card=document.createElement('article');card.className='card';
-  const srcdoc='<!doctype html><html><head><meta charset="utf-8"><style>body{margin:0;font-family:Arial,sans-serif}'+(p.css||'')+'</style></head><body>'+(p.html||'')+'<script>
 (async function(){
   const $=id=>document.getElementById(id);
-  const state=await CodeTHDCloud.ensureSession();
-  if(!state){location.href='auth.html';return}
-  const me=state.profile;
-  const el=$('projects'),count=$('count'),msg=$('msg');
-  const viewId=localStorage.getItem('codethd-view-project-id');
-  function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
-  function frame(p){return '<!doctype html><html><head><meta charset="utf-8"><style>body{margin:0;font-family:Arial,sans-serif}'+(p.css||'')+'</style></head><body>'+(p.html||'')+'<script>'+(p.js||'').replace(/<\/script>/gi,'')+'<\/script></body></html>'}
-  async function render(){
-    el.innerHTML='<div class="loading">✨ جاري تحميل المشاريع...</div>';
-    try{
-      let list=await CodeTHDCloud.ownProjects();
-      if(viewId){
-        const p=await CodeTHDCloud.project(viewId);
-        if(p) list=[p];
-      }
-      count.textContent=list.length+' مشروع';
-      if(!list.length){el.innerHTML='<div class="empty"><i class="fa-regular fa-folder-open"></i><h2>لا توجد مشاريع بعد</h2><p>افتح المحرر وأنشئ أول مشروع لك.</p><a class="btn primary" href="index.html">فتح المحرر</a></div>';return}
-      const grid=document.createElement('div');grid.className='grid';
-      list.forEach(p=>{
-        const mine=p.user_id===me.id;const card=document.createElement('article');card.className='card';
-        card.innerHTML='<div class="top"><div><h3>'+esc(p.name)+'</h3><div class="date">'+new Date(p.updated_at).toLocaleString('ar-SA')+'</div></div><div class="icon"><i class="fa-solid fa-code"></i></div></div><div class="preview"><iframe sandbox="allow-scripts" title="معاينة"></iframe></div><div class="card-actions"><button class="btn primary open">فتح</button>'+(mine?'<button class="btn danger delete">حذف</button>':'')+'</div>';
-        card.querySelector('iframe').srcdoc=frame(p);
-        card.querySelector('.open').onclick=()=>{localStorage.setItem('codethd-active-project-id',p.id);localStorage.removeItem('codethd-view-project-id');location.href='index.html'};
-        if(mine)card.querySelector('.delete').onclick=async()=>{if(!confirm('هل تريد حذف هذا المشروع؟'))return;try{await CodeTHDCloud.deleteProject(p.id);render()}catch(e){msg.textContent='تعذر حذف المشروع: '+CodeTHDCloud.errorText(e)}};
-        grid.appendChild(card);
-      });
-      el.innerHTML='';el.appendChild(grid);
-    }catch(e){msg.textContent='تعذر تحميل المشاريع: '+CodeTHDCloud.errorText(e);el.innerHTML=''}
+  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+  const theme=localStorage.getItem('codethd-theme')||'dark-mode';
+  document.body.classList.toggle('light',theme==='light-mode');
+  $('theme').textContent=theme==='light-mode'?'☀️':'🌙';
+  $('theme').onclick=()=>{
+    const light=document.body.classList.toggle('light');
+    localStorage.setItem('codethd-theme',light?'light-mode':'dark-mode');
+    $('theme').textContent=light?'☀️':'🌙';
+  };
+  $('logout').onclick=async()=>{
+    try{await CodeTHDCloud.signOut()}finally{location.href='auth.html'}
+  };
+
+  const state=await CodeTHDCloud.ensureSession().catch(e=>({error:e}));
+  if(!state || state.error){
+    $('msg').textContent=state?.error ? CodeTHDCloud.errorText(state.error) : 'سجّل الدخول لفتح المشاريع المشتركة.';
+    $('projects').innerHTML='<div class="empty"><i class="fa-regular fa-user"></i><h2>الحساب مطلوب</h2><p>أدخل حسابك لعرض مشاريعك والمشاريع المشتركة.</p><a class="btn primary" href="auth.html">تسجيل الدخول</a></div>';
+    return;
   }
-  $('logout').onclick=async()=>{await CodeTHDCloud.signOut();location.href='auth.html'};
-  $('theme').onclick=()=>{const light=document.body.classList.toggle('light');localStorage.setItem('codethd-theme',light?'light-mode':'dark-mode');$('theme').textContent=light?'☀️':'🌙'};
-  const t=localStorage.getItem('codethd-theme')||'dark-mode';document.body.classList.toggle('light',t==='light-mode');$('theme').textContent=t==='light-mode'?'☀️':'🌙';
-  render();
+
+  const me=state.session.user;
+  const viewId=localStorage.getItem('codethd-view-project-id');
+  let list=[];
+  try{
+    $('projects').innerHTML='<div class="loading">✨ جاري تحميل المشاريع...</div>';
+    if(viewId){
+      const p=await CodeTHDCloud.project(viewId);
+      if(p) list=[p];
+      else localStorage.removeItem('codethd-view-project-id');
+    }
+    if(!viewId || !list.length) list=await CodeTHDCloud.ownProjects();
+    $('count').textContent=list.length+' مشروع';
+    if(viewId && list.length) $('subtitle').textContent='مشاهدة المشروع المحدد من مجتمع Codethd.';
+
+    if(!list.length){
+      $('projects').innerHTML='<div class="empty"><i class="fa-regular fa-folder-open"></i><h2>لا توجد مشاريع بعد</h2><p>افتح المحرر وأنشئ أول مشروع لك.</p><a class="btn primary" href="index.html">فتح المحرر</a></div>';
+      return;
+    }
+
+    const grid=document.createElement('div');
+    grid.className='grid';
+
+    for(const p of list){
+      const mine=p.user_id===me.id;
+      const card=document.createElement('article');
+      card.className='card';
+      card.innerHTML='<div class="top"><div><h3>'+esc(p.name)+'</h3><div class="owner">'+(mine?'مشروعك':'مشروع مشترك')+'</div><div class="date">'+(p.updated_at?new Date(p.updated_at).toLocaleString('ar-SA'):'')+'</div></div><div class="icon"><i class="fa-solid fa-code"></i></div></div><div class="preview"><iframe sandbox="allow-scripts" title="معاينة '+esc(p.name)+'"></iframe></div><div class="card-actions"><button class="btn primary open" type="button">فتح بالمحرر</button>'+(mine?'<button class="btn danger delete" type="button">حذف</button>':'')+'</div>';
+
+      const frame='<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><style>html,body{margin:0;min-height:100%;font-family:Arial,sans-serif}body{padding:14px}'+(p.css||'')+'</style></head><body>'+ (p.html||'') + '<script>' + String(p.js||'').replace(/<\\/script>/gi,'') + '<\\/script></body></html>';
+      card.querySelector('iframe').srcdoc=frame;
+      card.querySelector('.open').onclick=()=>{
+        localStorage.setItem('codethd-active-project-id',p.id);
+        localStorage.removeItem('codethd-view-project-id');
+        location.href='index.html';
+      };
+      if(mine){
+        card.querySelector('.delete').onclick=async()=>{
+          if(!confirm('هل تريد حذف هذا المشروع؟')) return;
+          const btn=card.querySelector('.delete');btn.disabled=true;
+          try{
+            await CodeTHDCloud.deleteProject(p.id);
+            if(localStorage.getItem('codethd-active-project-id')===p.id) localStorage.removeItem('codethd-active-project-id');
+            card.remove();
+            const remaining=grid.children.length;
+            $('count').textContent=remaining+' مشروع';
+            if(!remaining) $('projects').innerHTML='<div class="empty"><i class="fa-regular fa-folder-open"></i><h2>لا توجد مشاريع بعد</h2><p>أنشئ مشروعًا جديدًا من المحرر.</p><a class="btn primary" href="index.html">فتح المحرر</a></div>';
+          }catch(e){
+            btn.disabled=false;
+            $('msg').textContent='تعذر حذف المشروع: '+CodeTHDCloud.errorText(e);
+          }
+        };
+      }
+      grid.appendChild(card);
+    }
+    $('projects').innerHTML='';
+    $('projects').appendChild(grid);
+  }catch(e){
+    $('msg').textContent='تعذر تحميل المشاريع: '+CodeTHDCloud.errorText(e);
+    $('projects').innerHTML='<div class="empty"><i class="fa-solid fa-triangle-exclamation"></i><h2>تعذر تحميل المشاريع</h2><p>حاول تحديث الصفحة مرة أخرى.</p><button class="btn primary" id="retry">إعادة المحاولة</button></div>';
+    $('retry').onclick=()=>location.reload();
+  }
 })();
-</script></body></html>
+</script>
+</body>
+</html>
