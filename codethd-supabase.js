@@ -4,7 +4,7 @@
   const cfg=window.CODETHD_CONFIG||{};
   if(!cfg.url||!cfg.key||!window.supabase) throw new Error('Codethd cloud configuration is missing.');
   const client=window.supabase.createClient(cfg.url,cfg.key,{
-    auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}
+    auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}
   });
   const emailForUsername=(username)=>String(username||'').trim().toLowerCase()+'@users.codethd.app';
   const cleanUsername=(username)=>String(username||'').trim().toLowerCase();
@@ -26,23 +26,42 @@
     return {id:user?.id||'',username:String(m.username||fallback).toLowerCase(),display_name:String(m.display_name||m.username||fallback),bio:String(m.bio||''),avatar_url:m.avatar_url||null,created_at:user?.created_at||null};
   }
   async function profile(userId){const r=await withTimeout(client.from('profiles').select('id,username,display_name,bio,avatar_url,created_at').eq('id',userId).maybeSingle(),6000,'تحميل بيانات الحساب');if(r.error)throw r.error;return r.data||null}
-  async function signUp(username,password,displayName){
-    const u=cleanUsername(username); if(!usernameOk(u)) throw new Error('اسم المستخدم يجب أن يكون 3-24 حرفًا بالإنجليزية أو أرقام أو _.');
+  async function signUp(email,username,password,displayName){
+    const e=String(email||'').trim().toLowerCase(),u=cleanUsername(username);
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)) throw new Error('أدخل بريدًا إلكترونيًا صحيحًا.');
+    if(!usernameOk(u)) throw new Error('اسم المستخدم يجب أن يكون 3-24 حرفًا بالإنجليزية أو أرقام أو _.');
     if(!passwordOk(password)) throw new Error('كلمة المرور يجب أن تكون 8 أحرف على الأقل.');
-    const email=emailForUsername(u);
-    const r=await withTimeout(client.auth.signUp({email,password,options:{data:{username:u,display_name:(displayName||u).trim()}}}),12000,'إنشاء الحساب');
+    const redirectUrl=new URL('index.html',window.location.href).toString();
+    const r=await withTimeout(client.auth.signUp({email:e,password,options:{data:{username:u,display_name:(displayName||u).trim()},emailRedirectTo:redirectUrl}}),12000,'إنشاء الحساب');
     if(r.error)throw r.error;
-    if(!r.data.session) throw new Error('تم إنشاء الحساب، لكن تأكيد البريد مفعّل. عطّل Confirm email في إعدادات Authentication.');
+    return {session:r.data.session,profile:quickProfile(r.data.user),needsEmailConfirmation:!r.data.session};
+  }
+  async function signIn(identifier,password){
+    const value=String(identifier||'').trim();
+    const email=value.includes('@')?value.toLowerCase():emailForUsername(value);
+    if(!email||!email.includes('@')) throw new Error('أدخل بريدك الإلكتروني أو اسم المستخدم القديم.');
+    if(!passwordOk(password)) throw new Error('كلمة المرور يجب أن تكون 8 أحرف على الأقل.');
+    const r=await withTimeout(client.auth.signInWithPassword({email,password}),12000,'تسجيل الدخول');
+    if(r.error)throw r.error;
     return {session:r.data.session,profile:quickProfile(r.data.user)};
   }
-  async function signIn(username,password){
-    const u=cleanUsername(username); if(!usernameOk(u)) throw new Error('اسم المستخدم غير صالح.');
-    if(!passwordOk(password)) throw new Error('كلمة المرور يجب أن تكون 8 أحرف على الأقل.');
-    const r=await withTimeout(client.auth.signInWithPassword({email:emailForUsername(u),password}),12000,'تسجيل الدخول');
-    if(r.error)throw r.error;
-    return {session:r.data.session,profile:quickProfile(r.data.user)};
+  async function ensureSession(){
+    const s=await session();if(!s)return null;
+    let p=null;try{p=await profile(s.user.id)}catch(e){console.warn('Profile lookup:',e)}
+    return {session:s,profile:p||quickProfile(s.user)};
   }
-  async function ensureSession(){const s=await session();if(!s)return null;return {session:s,profile:quickProfile(s.user)}}
+  async function requestPasswordReset(email){
+    const e=String(email||'').trim().toLowerCase();
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e))throw new Error('أدخل بريدًا إلكترونيًا صحيحًا.');
+    const redirectUrl=new URL('auth.html?mode=recovery',window.location.href).toString();
+    const r=await withTimeout(client.auth.resetPasswordForEmail(e,{redirectTo:redirectUrl}),12000,'إرسال رابط الاستعادة');
+    if(r.error)throw r.error;return true;
+  }
+  async function updatePassword(password){
+    if(!passwordOk(password))throw new Error('كلمة المرور يجب أن تكون 8 أحرف على الأقل.');
+    const r=await withTimeout(client.auth.updateUser({password}),12000,'تحديث كلمة المرور');
+    if(r.error)throw r.error;return r.data.user;
+  }
   async function signOut(){await withTimeout(client.auth.signOut(),7000,'تسجيل الخروج')}
   async function saveProject(id,data){
     const s=await session(); if(!s)throw new Error('انتهت الجلسة.');
@@ -109,5 +128,16 @@
     const r=await withTimeout(client.from('profiles').update(data).eq('id',s.user.id).select('id,username,display_name,bio,avatar_url').single(),7000,'تحديث الحساب');
     if(r.error)throw r.error;return r.data;
   }
-  window.CodeTHDCloud={client,emailForUsername,usernameOk,passwordOk,errorText,session,quickProfile,profile,signUp,signIn,ensureSession,signOut,saveProject,ownProjects,userProjects,project,deleteProject,searchPeople,allPeople,peopleProjects,followed,isFollowing,toggleFollow,stats,updateProfile};
+  async function uploadAvatar(file){
+    const s=await session();if(!s)throw new Error('سجّل الدخول أولًا.');
+    if(!file||!['image/png','image/jpeg','image/webp'].includes(file.type))throw new Error('اختر صورة PNG أو JPG أو WebP.');
+    if(file.size>2*1024*1024)throw new Error('حجم الصورة يجب ألا يتجاوز 2 ميغابايت.');
+    const ext=file.type==='image/png'?'png':file.type==='image/webp'?'webp':'jpg';
+    const path=s.user.id+'/avatar-'+Date.now()+'.'+ext;
+    const up=await withTimeout(client.storage.from('codethd-avatars').upload(path,file,{upsert:true,contentType:file.type,cacheControl:'3600'}),12000,'رفع الصورة');
+    if(up.error)throw up.error;
+    const pub=client.storage.from('codethd-avatars').getPublicUrl(path);
+    return await updateProfile({avatar_url:pub.data.publicUrl});
+  }
+  window.CodeTHDCloud={client,emailForUsername,usernameOk,passwordOk,errorText,session,quickProfile,profile,signUp,signIn,ensureSession,requestPasswordReset,updatePassword,uploadAvatar,signOut,saveProject,ownProjects,userProjects,project,deleteProject,searchPeople,allPeople,peopleProjects,followed,isFollowing,toggleFollow,stats,updateProfile};
 })();
