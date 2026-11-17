@@ -6,6 +6,7 @@ import { spawnSync } from "node:child_process";
 const root = process.cwd();
 const pages = [
   "index.html",
+  "studio.html",
   "languages.html",
   "language.html",
   "projects.html",
@@ -31,7 +32,7 @@ for (const page of pages) {
     if (seen.has(id)) errors.push(page + ": duplicate id #" + id);
     seen.add(id);
   }
-  if (page === "index.html") {
+  if (page === "studio.html") {
     for (const id of requiredEditorIds) {
       if (!seen.has(id)) errors.push(page + ": required editor control #" + id + " is missing");
     }
