@@ -15,7 +15,7 @@
       gtag('config', 'G-CPJSF9TSM4');
     </script>
 
-    <title>Codethd</title>
+    <title>CodeTHD Studio — مساحة المطورين</title>
     
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -386,34 +386,146 @@
                 display: none;
             }
         }
+    
+        /* CodeTHD Studio redesign */
+        body{background:var(--ct-bg);color:var(--ct-text);overflow:hidden}
+        .studio-header{
+          height:68px;flex:none;padding:0 22px;display:flex;align-items:center;justify-content:space-between;
+          gap:18px;background:var(--ct-header);border-bottom:1px solid var(--ct-line);z-index:20;
+          backdrop-filter:blur(18px);box-shadow:0 8px 28px rgba(0,0,0,.08)
+        }
+        .brand-lockup{display:flex;align-items:center;gap:12px;min-width:190px}
+        .brand-mark{width:40px;height:40px;display:grid;place-items:center;border-radius:13px;
+          color:#05251c;background:linear-gradient(145deg,#71f0c4,#24bd92);font-size:19px;
+          box-shadow:0 7px 20px rgba(38,198,150,.23)}
+        .brand-name{font-size:1.18rem;font-weight:900;letter-spacing:-.04em;color:var(--ct-text)}
+        .brand-caption{display:block;color:var(--ct-muted);font-size:.66rem;letter-spacing:.13em;font-weight:800;margin-top:1px}
+        .studio-nav{display:flex;align-items:center;gap:7px}
+        .studio-nav .btn{white-space:nowrap}
+        .studio-main{flex:1;min-height:0;display:flex;flex-direction:column;padding:0}
+        .studio-intro{display:flex;justify-content:space-between;align-items:center;gap:18px;padding:17px 22px 13px;flex:none}
+        .studio-kicker{display:flex;align-items:center;gap:8px;color:var(--ct-accent);font-size:.7rem;font-weight:900;letter-spacing:.13em}
+        .studio-kicker:before{content:"";width:22px;height:2px;border-radius:9px;background:var(--ct-accent)}
+        .studio-intro h1{font-size:clamp(1.25rem,2.4vw,1.85rem);letter-spacing:-.045em;margin:5px 0 3px;color:var(--ct-text);font-weight:900}
+        .studio-intro p{margin:0;color:var(--ct-muted);font-size:.84rem}
+        .studio-quickstats{display:flex;gap:9px;align-items:center}
+        .quickstat{display:flex;align-items:center;gap:8px;padding:9px 12px;border-radius:12px;
+          border:1px solid var(--ct-line);background:var(--ct-panel);color:var(--ct-muted);font-size:.72rem;font-weight:700}
+        .quickstat i{font-size:.95rem;color:var(--ct-accent)}
+        .editor-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;
+          margin:0 18px 12px;padding:9px 11px;border:1px solid var(--ct-line);border-radius:13px;
+          background:var(--ct-panel);box-shadow:0 7px 24px rgba(0,0,0,.07);flex:none}
+        .toolbar-label{display:flex;align-items:center;gap:8px;color:var(--ct-muted);font-size:.77rem;font-weight:800;padding:0 7px}
+        .toolbar-label i{color:var(--ct-accent)}
+        .toolbar-controls{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+        .editor-toolbar .btn,.editor-toolbar .layout-toggle,.editor-toolbar .theme-toggle{
+          min-height:36px;border-radius:9px;font-size:.78rem;padding:7px 10px
+        }
+        .editor-toolbar .btn.primary{background:linear-gradient(135deg,#64e9b8,#2abf91);color:#06281e;border:0}
+        .editor-toolbar .btn-danger{color:#ff8e91}
+        .mobile-tabs{flex:none;margin:0 12px 10px;border:1px solid var(--ct-line);border-radius:11px;overflow:hidden;background:var(--ct-panel)}
+        .tab-btn{padding:9px 7px;border:0;font-size:.78rem}
+        .tab-btn.active{background:rgba(84,224,176,.1);border-bottom:2px solid var(--ct-accent)}
+        .workspace{gap:12px;padding:0 18px 16px;min-height:0}
+        .workspace.mode-columns{grid-template-columns:repeat(4,minmax(0,1fr))}
+        .workspace.mode-split{grid-template-columns:minmax(0,.95fr) minmax(0,1.05fr)}
+        .panel,.preview-container{border:1px solid var(--ct-line);border-radius:14px;box-shadow:0 12px 34px rgba(0,0,0,.1)}
+        .panel{background:var(--ct-panel);border-left:1px solid var(--ct-line)}
+        .panel-header,.preview-header{min-height:43px;padding:8px 13px;background:var(--ct-panel-raised);border-bottom:1px solid var(--ct-line);font-size:.81rem}
+        .panel-title{font-weight:850;letter-spacing:.03em}
+        .copy-btn{width:29px;height:29px;border:1px solid var(--ct-line);border-radius:8px;color:var(--ct-muted);opacity:1}
+        .copy-btn:hover{background:rgba(84,224,176,.12);color:var(--ct-accent)}
+        .CodeMirror{background:#0c1728!important;color:#dbe8f7!important;font-size:13.5px;line-height:1.6}
+        .CodeMirror-gutters{background:#101c2d!important;border-color:#243750!important}
+        .CodeMirror-linenumber{color:#7086a1!important}
+        .cm-s-material-darker .cm-keyword,.cm-s-material-darker .cm-operator{color:#c792ea!important}
+        .cm-s-material-darker .cm-string,.cm-s-material-darker .cm-string-2{color:#c3e88d!important}
+        .cm-s-material-darker .cm-number{color:#f78c6c!important}
+        .cm-s-material-darker .cm-def,.cm-s-material-darker .cm-variable-2{color:#82aaff!important}
+        .cm-s-material-darker .cm-comment{color:#78909c!important}
+        .preview-container{background:#fff;border-left:1px solid var(--ct-line)}
+        .console-panel{height:132px;background:#0b1524;border-top:1px solid #243750}
+        .console-header{background:#101d30;color:#bdcce0;border-bottom:1px solid #26364d;font-size:.73rem}
+        #console-output{font:12px/1.5 ui-monospace,Consolas,monospace}
+        .console-log{color:#79dfb8}.console-error{color:#ff8585}.console-warn{color:#ffc777}.console-info{color:#80c6fa}
+        .studio-header .btn{font-size:.78rem}
+        @media(max-width:1100px){
+          .studio-header{padding:0 14px}.studio-intro{padding-inline:15px}
+          .studio-quickstats .quickstat:last-child{display:none}
+          .editor-toolbar{margin-inline:12px}.workspace{padding-inline:12px}
+        }
+        @media(max-width:900px){
+          body{height:100dvh}
+          .studio-header{height:60px}
+          .studio-nav .hide-mobile{display:none}
+          .studio-main{min-height:0}
+          .studio-intro{padding:12px 14px 10px}
+          .studio-intro p{font-size:.76rem}
+          .studio-quickstats{display:none}
+          .editor-toolbar{margin:0 10px 9px;padding:7px}
+          .toolbar-label{display:none}
+          .toolbar-controls{width:100%;justify-content:center}
+          .workspace.mode-columns,.workspace.mode-split{grid-template-columns:1fr!important;padding:0 10px 10px}
+          .workspace .editors-container{display:flex!important;flex-direction:column}
+          .panel,.preview-container{border-radius:12px}
+          .console-panel{height:116px}
+        }
+        @media(max-width:560px){
+          .brand-lockup{min-width:0}.brand-mark{width:35px;height:35px}
+          .brand-name{font-size:1rem}.brand-caption{font-size:.56rem}
+          .studio-header{padding:0 10px;gap:6px}
+          .studio-intro h1{font-size:1.22rem}
+          .studio-intro p{max-width:270px;line-height:1.45}
+          .editor-toolbar .btn,.editor-toolbar .layout-toggle,.editor-toolbar .theme-toggle{font-size:.7rem;padding:7px 8px;min-height:34px}
+          .mobile-tabs{margin-inline:10px}
+          .tab-btn{font-size:.72rem;padding:8px 3px}
+        }
+
     </style>
+<link rel="stylesheet" href="codethd-brand.css?v=20261117.2">
 </head>
-<body class="dark-mode green-code"><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="codethd-config.js?v=20260928.2"></script><script src="codethd-supabase.js?v=20260929.3"></script><script>window.CODETHD_AUTH_READY=CodeTHDCloud.ensureSession().catch(()=>null);</script>
+<body class="dark-mode"><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="codethd-config.js?v=20260928.2"></script><script src="codethd-supabase.js?v=20260929.3"></script><script>window.CODETHD_AUTH_READY=CodeTHDCloud.ensureSession().catch(()=>null);</script>
 
     <div id="particles"></div>
 
-    <header>
-        <div class="logo">
-            <i class="fa-solid fa-code"></i>
-            <span>Codethd</span>
-        </div>
-        <div class="header-actions">
-            <a class="btn" href="community.html" title="الأصدقاء والمطورون"><i class="fa-solid fa-user-group"></i> <span class="hide-mobile">الأصدقاء</span></a><a class="btn" href="projects.html" title="المشاريع"><i class="fa-solid fa-folder-open"></i> <span class="hide-mobile">المشاريع</span></a>
-            <a class="btn" href="languages.html" title="لغات البرمجة"><i class="fa-solid fa-language"></i> <span class="hide-mobile">لغات البرمجة</span></a>
-            <button class="btn" id="runPreviewBtn" title="تشغيل JavaScript في المعاينة عند الطلب"><i class="fa-solid fa-play"></i> <span class="hide-mobile">تشغيل</span></button>
-            <button class="btn" id="saveProjectBtn" title="حفظ المشروع فوراً"><i class="fa-solid fa-floppy-disk"></i> <span class="hide-mobile">حفظ</span></button>
-            <button class="layout-toggle" id="layoutToggle" title="تبديل شكل التخطيط">
-                <i class="fa-solid fa-table-columns"></i>
-                <span class="hide-mobile" id="layoutText">4 أعمدة</span>
-            </button>
-            <button class="btn" id="importBtn" title="استيراد مشروع HTML"><i class="fa-solid fa-file-import"></i> <span class="hide-mobile">استيراد</span></button>
-            <button class="btn" id="exportBtn" title="تصدير كملف HTML"><i class="fa-solid fa-file-export"></i> <span class="hide-mobile">تصدير</span></button>
-            <button class="btn btn-danger" id="clearBtn" title="مسح الكود"><i class="fa-solid fa-trash"></i> <span class="hide-mobile">مسح</span></button>
-            <button class="theme-toggle" id="themeToggle" title="تبديل المظهر">
-                <span class="theme-icon">🌙</span>
-            </button>
-        </div>
-    <a class="btn" id="authUserBtn" href="auth.html" title="الحساب"><i class="fa-solid fa-user"></i> <span class="hide-mobile">الحساب</span></a></header>
+    <header class="studio-header">
+        <a class="brand-lockup" href="index.html" aria-label="CodeTHD home">
+            <span class="brand-mark"><i class="fa-solid fa-code"></i></span>
+            <span><span class="brand-name">CodeTHD</span><small class="brand-caption">DEVELOPER STUDIO</small></span>
+        </a>
+        <nav class="studio-nav" aria-label="التنقل الرئيسي">
+            <a class="btn" href="languages.html" title="مكتبة اللغات"><i class="fa-solid fa-layer-group"></i><span class="hide-mobile">اللغات</span></a>
+            <a class="btn" href="projects.html" title="مشاريعي"><i class="fa-solid fa-folder-open"></i><span class="hide-mobile">مشاريعي</span></a>
+            <a class="btn" href="community.html" title="مجتمع المطورين"><i class="fa-solid fa-users"></i><span class="hide-mobile">المجتمع</span></a>
+            <a class="btn" id="authUserBtn" href="auth.html" title="الحساب"><i class="fa-regular fa-user"></i><span class="hide-mobile">حسابي</span></a>
+        </nav>
+    </header>
+
+    <main class="studio-main">
+        <section class="studio-intro">
+            <div>
+                <div class="studio-kicker">CODETHD / BUILD SOMETHING GREAT</div>
+                <h1>مساحة واحدة. أفكار بلا حدود.</h1>
+                <p>اكتب الكود، جرّب فكرتك، وشاهد مشروعك يتحوّل إلى واقع.</p>
+            </div>
+            <div class="studio-quickstats" aria-label="ميزات المحرر">
+                <div class="quickstat"><i class="fa-solid fa-bolt"></i><span>معاينة مباشرة</span></div>
+                <div class="quickstat"><i class="fa-solid fa-cloud-arrow-up"></i><span>حفظ مشاريعك</span></div>
+            </div>
+        </section>
+
+        <section class="editor-toolbar" aria-label="أدوات المشروع">
+            <div class="toolbar-label"><i class="fa-solid fa-sliders"></i><span>أدوات مساحة العمل</span></div>
+            <div class="toolbar-controls">
+                <button class="btn primary" id="runPreviewBtn" title="تشغيل JavaScript في المعاينة عند الطلب"><i class="fa-solid fa-play"></i><span>تشغيل</span></button>
+                <button class="btn" id="saveProjectBtn" title="حفظ المشروع فوراً"><i class="fa-solid fa-floppy-disk"></i><span>حفظ</span></button>
+                <button class="layout-toggle" id="layoutToggle" title="تبديل شكل التخطيط"><i class="fa-solid fa-table-columns"></i><span id="layoutText">4 أعمدة</span></button>
+                <button class="btn" id="importBtn" title="استيراد مشروع HTML"><i class="fa-solid fa-file-import"></i><span>استيراد</span></button>
+                <button class="btn" id="exportBtn" title="تصدير كملف HTML"><i class="fa-solid fa-file-export"></i><span>تصدير</span></button>
+                <button class="btn btn-danger" id="clearBtn" title="مسح الكود"><i class="fa-regular fa-trash-can"></i><span>مسح</span></button>
+                <button class="theme-toggle" id="themeToggle" title="تبديل المظهر"><span class="theme-icon">🌙</span></button>
+            </div>
+        </section>
 
     <div class="mobile-tabs">
         <button class="tab-btn active" data-tab="preview-tab">النتيجة (Preview)</button>
@@ -486,6 +598,7 @@
         </div>
 
     </div>
+    </main>
 
     <script>
         const themeToggle = document.getElementById('themeToggle');
