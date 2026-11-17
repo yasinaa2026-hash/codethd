@@ -1,5 +1,58 @@
-/* Codethd Cloud — real shared accounts and projects */
+/* CodeTHD Cloud bootstrap: resilient Supabase CDN loading with fallback. */
 (function(){
+  'use strict';
+  let resolveReady, rejectReady;
+  const ready = new Promise((resolve,reject)=>{resolveReady=resolve;rejectReady=reject;});
+  window.CodeTHDCloudReady = ready;
+  const facade = new Proxy({}, {
+    get(_target, key) {
+      if (key === 'then') return undefined;
+      if (key === 'errorText') return error => error?.message || 'تعذر تحميل خدمة الحسابات. تحقق من اتصال الإنترنت ثم أعد المحاولة.';
+      if (key === 'ready') return ready;
+      return (...args) => ready.then(api => {
+        const method = api && api[key];
+        if (typeof method !== 'function') throw new Error('خدمة الحسابات غير جاهزة. أعد تحميل الصفحة.');
+        return method(...args);
+      });
+    }
+  });
+  window.CodeTHDCloud = facade;
+
+  function loadScript(url, timeoutMs=8000) {
+    return new Promise((resolve,reject)=>{
+      const script=document.createElement('script');
+      let settled=false;
+      const finish=(error)=>{
+        if(settled)return; settled=true; clearTimeout(timer);
+        script.onload=null; script.onerror=null;
+        error ? reject(error) : resolve();
+      };
+      const timer=setTimeout(()=>finish(new Error('انتهت مهلة تحميل مكتبة الحسابات.')),timeoutMs);
+      script.src=url;
+      script.async=true;
+      script.onload=()=>finish();
+      script.onerror=()=>finish(new Error('تعذر تحميل مكتبة Supabase من '+url));
+      document.head.appendChild(script);
+    });
+  }
+
+  async function boot() {
+    if (!window.supabase) {
+      const sources=[
+        'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2',
+        'https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js'
+      ];
+      let lastError;
+      for (const source of sources) {
+        try { await loadScript(source); if (window.supabase) break; }
+        catch(error) { lastError=error; }
+      }
+      if (!window.supabase) throw lastError || new Error('لم يتم تحميل مكتبة Supabase.');
+    }
+    const config=window.CODETHD_CONFIG||{};
+    if(!config.url || !config.key) throw new Error('إعدادات اتصال Supabase غير موجودة. تحقق من codethd-config.js.');
+    // The original adapter initializes the client and publishes the complete API.
+    (function(){
   'use strict';
   const cfg=window.CODETHD_CONFIG||{};
   if(!cfg.url||!cfg.key||!window.supabase) throw new Error('Codethd cloud configuration is missing.');
@@ -145,4 +198,18 @@
     return await updateProfile({avatar_url:pub.data.publicUrl});
   }
   window.CodeTHDCloud={client,emailForUsername,usernameOk,passwordOk,errorText,session,quickProfile,profile,signUp,signIn,ensureSession,requestPasswordReset,updatePassword,uploadAvatar,signOut,saveProject,ownProjects,userProjects,project,deleteProject,searchPeople,allPeople,peopleProjects,followed,isFollowing,toggleFollow,stats,updateProfile};
+
+    })();
+    const api=window.CodeTHDCloud;
+    if (!api || api === facade || typeof api.ensureSession !== 'function') {
+      throw new Error('تم تحميل Supabase لكن تعذر تهيئة خدمات CodeTHD.');
+    }
+    return api;
+  }
+
+  boot().then(resolveReady).catch(error=>{
+    console.error('CodeTHD Supabase bootstrap failed:',error);
+    rejectReady(error);
+    window.dispatchEvent(new CustomEvent('codethd-cloud-error',{detail:{message:error?.message||'Supabase bootstrap failed'}}));
+  });
 })();
