@@ -6,8 +6,8 @@
 <title>الحساب — CodeTHD</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="codethd-config.js?v=20261117.4"></script>
-<script src="codethd-supabase.js?v=20261117.4"></script>
+<script src="codethd-config.js?v=20261117.6"></script>
+<script src="codethd-supabase.js?v=20261117.6"></script>
 <link rel="stylesheet" href="codethd-brand.css?v=20261117.4">
 <style>
 :root{color-scheme:dark;--bg:#08111f;--panel:#101d30;--line:rgba(151,179,211,.17);--text:#ecf3fb;--muted:#9badc4;--accent:#54e0b0;--danger:#ff8585}
@@ -88,7 +88,15 @@ label{display:block;font-size:.83rem;font-weight:750;margin:13px 0 6px}.input{wi
   $('backLoginBtn').onclick=()=>tab(true);
   if(mode==='signup')tab(false);
   if(mode==='recovery'){$('tabs').classList.add('hidden');show('recoveryForm');$('title').textContent='كلمة مرور جديدة';$('subtitle').textContent='اكتب كلمة مرور جديدة لحسابك.'}
-  try{const state=await CodeTHDCloud.ensureSession();if(state&&mode!=='recovery')home()}catch(e){console.warn(e)}
+  // Keep the form interactive immediately; session restoration must never block form handlers.
+  if(!window.CodeTHDCloud){
+    msg('تعذّر تحميل خدمة الحسابات. حدّث الصفحة، وإذا استمرت المشكلة تحقق من اتصال الإنترنت.','error');
+    ['loginBtn','signupBtn','resetBtn','savePasswordBtn'].forEach(id=>{const el=$(id);if(el)el.disabled=true});
+    return;
+  }
+  window.CodeTHDCloud.ensureSession()
+    .then(state=>{if(state&&mode!=='recovery')home()})
+    .catch(error=>console.warn('Session restore failed; sign-in form remains available:',error));
   $('loginForm').onsubmit=async e=>{
     e.preventDefault();const b=$('loginBtn');b.disabled=true;msg('جارٍ تسجيل الدخول...');
     try{await CodeTHDCloud.signIn($('loginEmail').value,$('loginPassword').value);msg('تم تسجيل الدخول بنجاح ✓','ok');setTimeout(home,250)}
