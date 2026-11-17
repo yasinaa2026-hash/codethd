@@ -400,6 +400,7 @@
         <div class="header-actions">
             <a class="btn" href="community.html" title="الأصدقاء والمطورون"><i class="fa-solid fa-user-group"></i> <span class="hide-mobile">الأصدقاء</span></a><a class="btn" href="projects.html" title="المشاريع"><i class="fa-solid fa-folder-open"></i> <span class="hide-mobile">المشاريع</span></a>
             <a class="btn" href="languages.html" title="لغات البرمجة"><i class="fa-solid fa-language"></i> <span class="hide-mobile">لغات البرمجة</span></a>
+            <button class="btn" id="runPreviewBtn" title="تشغيل JavaScript في المعاينة عند الطلب"><i class="fa-solid fa-play"></i> <span class="hide-mobile">تشغيل</span></button>
             <button class="btn" id="saveProjectBtn" title="حفظ المشروع فوراً"><i class="fa-solid fa-floppy-disk"></i> <span class="hide-mobile">حفظ</span></button>
             <button class="layout-toggle" id="layoutToggle" title="تبديل شكل التخطيط">
                 <i class="fa-solid fa-table-columns"></i>
@@ -428,7 +429,7 @@
                 <span><i class="fa-solid fa-desktop"></i> النتيجة (Preview)</span>
             </div>
             <div class="preview-body">
-                <iframe id="preview-area"></iframe>
+                <iframe id="preview-area" title="معاينة المشروع في إطار معزول" sandbox="allow-scripts"></iframe>
                 <div class="console-panel">
                     <div class="console-header">
                         <span><i class="fa-solid fa-terminal"></i> Console Output</span>
@@ -493,6 +494,7 @@
         const workspace = document.getElementById('workspace');
         const clearBtn = document.getElementById('clearBtn');
         const saveProjectBtn = document.getElementById('saveProjectBtn');
+        const runPreviewBtn = document.getElementById('runPreviewBtn');
         const exportBtn = document.getElementById('exportBtn');
         const importBtn = document.getElementById('importBtn');
         const particlesContainer = document.getElementById('particles');
@@ -607,82 +609,40 @@
             });
         }
 
-        function updatePreview() {
+        function updatePreview(executeJs = false) {
             try {
+                setupConsoleInterception();
                 const html = htmlEditor.getValue();
                 const css = cssEditor.getValue();
                 const js = jsEditor.getValue();
-                
-                const doc = previewArea.contentDocument || previewArea.contentWindow.document;
-                doc.open();
-                doc.write(`
-                    <!DOCTYPE html>
-                    <html lang="ar" dir="rtl">
-                        <head>
-                            <meta charset="UTF-8">
-                            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                            <style>
-                                body { margin: 0; padding: 15px; font-family: 'Segoe UI', sans-serif; }
-                                ${css}
-                            </style>
-                        </head>
-                        <body>
-                            ${html}
-                            <script>
-                                try {
-                                    ${js}
-                                } catch(e) {
-                                    console.error('خطأ في الكود:', e.message);
-                                }
-                            <\/script>
-                        </body>
-                    </html>
-                `);
-                doc.close();
-                setupConsoleInterception();
+                const closeScript = '<' + '/script>';
+                const scriptPolicy = executeJs ? "'unsafe-inline'" : "'none'";
+                const csp = '<meta http-equiv="Content-Security-Policy" content="default-src &#39;none&#39;; img-src data: blob:; style-src &#39;unsafe-inline&#39;; script-src ' + scriptPolicy + '; connect-src &#39;none&#39;; form-action &#39;none&#39;; base-uri &#39;none&#39;; object-src &#39;none&#39;; frame-src &#39;none&#39;">';
+                const safeCss = css.replace(/<\/style/gi, '<\\/' + 'style');
+                const safeJs = js.replace(/<\/script/gi, '<\\/' + 'script');
+                const bridge = "(function(){function send(type,args){parent.postMessage({source:'codethd-preview',type:type,args:Array.prototype.map.call(args,function(v){try{return typeof v==='object'?JSON.stringify(v):String(v)}catch(e){return String(v)}}).join(' ')},'*')}['log','info','warn','error'].forEach(function(type){var original=console[type].bind(console);console[type]=function(){original.apply(console,arguments);send(type,arguments)}});window.addEventListener('error',function(e){send('error',[e.message+' ('+e.lineno+':'+e.colno+')'])});window.addEventListener('unhandledrejection',function(e){send('error',[String(e.reason)])});})();";
+                const userScript = executeJs ? '<script>' + bridge + closeScript + '<script>try{' + safeJs + '}catch(e){console.error("خطأ في الكود:",e.message)}' + closeScript : '';
+                const page = '<!doctype html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">' +
+                    csp + '<style>body{margin:0;padding:15px;font-family:Segoe UI,sans-serif}' + safeCss + '</style></head><body>' +
+                    html + userScript + '</body></html>';
+                previewArea.setAttribute('sandbox', 'allow-scripts');
+                previewArea.srcdoc = page;
             } catch (error) {
                 console.error('خطأ في تحديث المعاينة:', error);
+                addConsoleOutput(error.message || String(error), 'error');
             }
         }
 
+        let codethdConsoleBridgeReady = false;
         function setupConsoleInterception() {
-            const iframe = previewArea;
-            
-            setTimeout(() => {
-                try {
-                    const iframeWindow = iframe.contentWindow;
-                    if (!iframeWindow || iframeWindow.__console_intercepted) return;
-                    
-                    const originalLog = iframeWindow.console.log;
-                    const originalError = iframeWindow.console.error;
-                    const originalWarn = iframeWindow.console.warn;
-                    const originalInfo = iframeWindow.console.info;
-
-                    iframeWindow.console.log = function(...args) {
-                        originalLog.apply(iframeWindow.console, args);
-                        addConsoleOutput(args.map(a => typeof a === 'object' ? JSON.stringify(a) : a).join(' '), 'log');
-                    };
-                    
-                    iframeWindow.console.error = function(...args) {
-                        originalError.apply(iframeWindow.console, args);
-                        addConsoleOutput(args.map(a => typeof a === 'object' ? JSON.stringify(a) : a).join(' '), 'error');
-                    };
-                    
-                    iframeWindow.console.warn = function(...args) {
-                        originalWarn.apply(iframeWindow.console, args);
-                        addConsoleOutput(args.map(a => typeof a === 'object' ? JSON.stringify(a) : a).join(' '), 'warn');
-                    };
-                    
-                    iframeWindow.console.info = function(...args) {
-                        originalInfo.apply(iframeWindow.console, args);
-                        addConsoleOutput(args.map(a => typeof a === 'object' ? JSON.stringify(a) : a).join(' '), 'info');
-                    };
-
-                    iframeWindow.__console_intercepted = true;
-                } catch (e) {
-                    console.log('لا يمكن الوصول إلى console في iframe');
-                }
-            }, 50);
+            if (codethdConsoleBridgeReady) return;
+            codethdConsoleBridgeReady = true;
+            window.addEventListener('message', function(event) {
+                if (event.source !== previewArea.contentWindow || !event.data || event.data.source !== 'codethd-preview') return;
+                const allowed = ['log', 'info', 'warn', 'error'];
+                const type = allowed.includes(event.data.type) ? event.data.type : 'log';
+                addConsoleOutput(String(event.data.args || ''), type);
+            });
         }
 
         function addConsoleOutput(message, type = 'log') {
@@ -768,6 +728,10 @@
         });
 
         saveProjectBtn.addEventListener('click', saveCurrentProject);
+        runPreviewBtn.addEventListener('click', () => {
+            updatePreview(true);
+            showNotification('تم إرسال الكود للمعاينة. 🔄');
+        });
 
         exportBtn.addEventListener('click', () => {
             const html = htmlEditor.getValue();
@@ -954,7 +918,7 @@
             }
             if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
                 e.preventDefault();
-                updatePreview();
+                updatePreview(true);
                 showNotification('تم تحديث المعاينة! 🔄');
             }
         });
