@@ -60,7 +60,7 @@ label{display:block;font-size:.84rem;font-weight:700;margin:13px 0 6px}
 </div>
   <div id="msg" class="msg"></div>
   <div class="note">حسابك محفوظ في Codethd، وستبقى مسجل الدخول عند عودتك للموقع.</div>
-  <a href="index.html" class="tab" style="display:block;text-align:center;text-decoration:none;margin-top:12px">فتح المحرر مباشرة</a>
+  <a href="studio.html" class="tab" style="display:block;text-align:center;text-decoration:none;margin-top:12px">فتح المحرر مباشرة</a>
 </main>
 <script>
 (async function(){
@@ -68,12 +68,13 @@ const $=id=>document.getElementById(id);
 function msg(t,type=''){ $('msg').textContent=t; $('msg').className='msg '+type; }
 function switchTab(login){$('loginTab').classList.toggle('active',login);$('signupTab').classList.toggle('active',!login);$('loginBox').classList.toggle('hidden',!login);$('signupBox').classList.toggle('hidden',login);msg('')}
 $('loginTab').onclick=()=>switchTab(true);$('signupTab').onclick=()=>switchTab(false);
+if(new URLSearchParams(location.search).get('mode')==='signup') switchTab(false);
 try{
   const s=await CodeTHDCloud.ensureSession();
-  if(s){$('loginUsername').value=s.profile.username||'';msg('أنت مسجل الدخول بالفعل ✓','ok');setTimeout(()=>location.href='index.html',300)}
+  if(s){$('loginUsername').value=s.profile.username||'';msg('أنت مسجل الدخول بالفعل ✓','ok');setTimeout(()=>location.href='studio.html',300)}
 }catch(e){console.warn(e)}
-$('loginForm').onsubmit=async e=>{e.preventDefault();const b=$('loginBtn');b.disabled=true;msg('جارٍ تسجيل الدخول...');try{await CodeTHDCloud.signIn($('loginUsername').value,$('loginPassword').value);msg('تم الدخول ✓','ok');setTimeout(()=>location.href='index.html',250)}catch(e){msg(CodeTHDCloud.errorText(e),'error')}finally{b.disabled=false}};
-$('signupForm').onsubmit=async e=>{e.preventDefault();const b=$('signupBtn');b.disabled=true;msg('جارٍ إنشاء حسابك...');try{await CodeTHDCloud.signUp($('signupUsername').value,$('signupPassword').value,$('displayName').value);msg('تم إنشاء الحساب 🎉','ok');setTimeout(()=>location.href='index.html',350)}catch(e){msg(CodeTHDCloud.errorText(e),'error')}finally{b.disabled=false}};
+$('loginForm').onsubmit=async e=>{e.preventDefault();const b=$('loginBtn');b.disabled=true;msg('جارٍ تسجيل الدخول...');try{await CodeTHDCloud.signIn($('loginUsername').value,$('loginPassword').value);msg('تم الدخول ✓','ok');setTimeout(()=>location.href='studio.html',250)}catch(e){msg(CodeTHDCloud.errorText(e),'error')}finally{b.disabled=false}};
+$('signupForm').onsubmit=async e=>{e.preventDefault();const b=$('signupBtn');b.disabled=true;msg('جارٍ إنشاء حسابك...');try{await CodeTHDCloud.signUp($('signupUsername').value,$('signupPassword').value,$('displayName').value);msg('تم إنشاء الحساب 🎉','ok');setTimeout(()=>location.href='studio.html',350)}catch(e){msg(CodeTHDCloud.errorText(e),'error')}finally{b.disabled=false}};
 $('theme').onclick=()=>{const light=document.body.classList.toggle('light');localStorage.setItem('codethd-theme',light?'light-mode':'dark-mode');$('theme').textContent=light?'☀️':'🌙'};
 const t=localStorage.getItem('codethd-theme')||'dark-mode';document.body.classList.toggle('light',t==='light-mode');$('theme').textContent=t==='light-mode'?'☀️':'🌙';
 })();

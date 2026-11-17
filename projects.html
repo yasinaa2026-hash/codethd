@@ -49,7 +49,7 @@ h3{font-size:1.03rem;margin-bottom:5px;word-break:break-word}
   <div class="logo"><i class="fa-solid fa-code"></i><span>Codethd</span></div>
   <div class="actions">
     <a class="btn" href="community.html"><i class="fa-solid fa-user-group"></i><span class="hide-mobile">الأصدقاء</span></a>
-    <a class="btn" href="index.html"><i class="fa-solid fa-code"></i><span class="hide-mobile">المحرر</span></a>
+    <a class="btn" href="studio.html"><i class="fa-solid fa-code"></i><span class="hide-mobile">المحرر</span></a>
     <button class="btn" id="logout"><i class="fa-solid fa-right-from-bracket"></i><span class="hide-mobile">خروج</span></button>
     <button class="btn" id="theme" type="button">🌙</button>
   </div>
@@ -62,7 +62,7 @@ h3{font-size:1.03rem;margin-bottom:5px;word-break:break-word}
   </section>
   <div class="toolbar">
     <span class="count" id="count"></span>
-    <a class="btn primary" href="index.html"><i class="fa-solid fa-plus"></i> مشروع جديد</a>
+    <a class="btn primary" href="studio.html"><i class="fa-solid fa-plus"></i> مشروع جديد</a>
   </div>
   <div id="msg" class="msg"></div>
   <section id="projects"></section>
@@ -109,7 +109,7 @@ h3{font-size:1.03rem;margin-bottom:5px;word-break:break-word}
     if(viewId && list.length) $('subtitle').textContent='مشاهدة المشروع المحدد من مجتمع Codethd.';
 
     if(!list.length){
-      $('projects').innerHTML='<div class="empty"><i class="fa-regular fa-folder-open"></i><h2>لا توجد مشاريع بعد</h2><p>افتح المحرر وأنشئ أول مشروع لك.</p><a class="btn primary" href="index.html">فتح المحرر</a></div>';
+      $('projects').innerHTML='<div class="empty"><i class="fa-regular fa-folder-open"></i><h2>لا توجد مشاريع بعد</h2><p>افتح المحرر وأنشئ أول مشروع لك.</p><a class="btn primary" href="studio.html">فتح المحرر</a></div>';
       return;
     }
 
@@ -129,7 +129,7 @@ h3{font-size:1.03rem;margin-bottom:5px;word-break:break-word}
       card.querySelector('.open').onclick=()=>{
         localStorage.setItem('codethd-active-project-id',p.id);
         localStorage.removeItem('codethd-view-project-id');
-        location.href='index.html';
+        location.href='studio.html';
       };
       if(mine){
         card.querySelector('.delete').onclick=async()=>{
@@ -141,7 +141,7 @@ h3{font-size:1.03rem;margin-bottom:5px;word-break:break-word}
             card.remove();
             const remaining=grid.children.length;
             $('count').textContent=remaining+' مشروع';
-            if(!remaining) $('projects').innerHTML='<div class="empty"><i class="fa-regular fa-folder-open"></i><h2>لا توجد مشاريع بعد</h2><p>أنشئ مشروعًا جديدًا من المحرر.</p><a class="btn primary" href="index.html">فتح المحرر</a></div>';
+            if(!remaining) $('projects').innerHTML='<div class="empty"><i class="fa-regular fa-folder-open"></i><h2>لا توجد مشاريع بعد</h2><p>أنشئ مشروعًا جديدًا من المحرر.</p><a class="btn primary" href="studio.html">فتح المحرر</a></div>';
           }catch(e){
             btn.disabled=false;
             $('msg').textContent='تعذر حذف المشروع: '+CodeTHDCloud.errorText(e);
