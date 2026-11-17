@@ -227,6 +227,8 @@
     if(!state) return;
     const account = document.getElementById('loginLink');
     if(account){ account.href='account.html'; account.textContent='حسابي'; }
+    const footerAccount = document.querySelector('footer .footer-links a[href="auth.html"]');
+    if(footerAccount){ footerAccount.href='account.html'; }
     ['startLink','heroStartLink','bottomStartLink'].forEach(function(id){
       const link = document.getElementById(id);
       if(link){ link.href='languages.html'; link.innerHTML='<i class="fa-solid fa-code"></i> ابدأ البرمجة'; }
