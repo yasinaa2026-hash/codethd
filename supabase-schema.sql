@@ -139,3 +139,67 @@ grant usage on schema public to authenticated;
 grant select, update on public.profiles to authenticated;
 grant select, insert, update, delete on public.projects to authenticated;
 grant select, insert, delete on public.follows to authenticated;
+
+-- CodeTHD server-side execution quota.
+-- The table has no client policies. Only the Edge Function's service-role client
+-- may call the quota function; never expose the service-role key in browser code.
+create table if not exists public.codethd_execution_limits (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  usage_date date not null default current_date,
+  executions integer not null default 0,
+  last_run_at timestamptz
+);
+
+alter table public.codethd_execution_limits enable row level security;
+revoke all on public.codethd_execution_limits from anon, authenticated;
+
+create or replace function public.consume_codethd_execution(
+  p_user_id uuid,
+  p_daily_limit integer default 25,
+  p_cooldown_seconds integer default 3
+)
+returns boolean
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_allowed boolean := false;
+  v_now timestamptz := now();
+begin
+  if p_user_id is null then
+    return false;
+  end if;
+
+  insert into public.codethd_execution_limits
+    (user_id, usage_date, executions, last_run_at)
+  values
+    (p_user_id, current_date, 1, v_now)
+  on conflict (user_id) do update
+    set usage_date = current_date,
+        executions = case
+          when public.codethd_execution_limits.usage_date <> current_date then 1
+          else public.codethd_execution_limits.executions + 1
+        end,
+        last_run_at = v_now
+    where
+      (
+        public.codethd_execution_limits.usage_date <> current_date
+        or public.codethd_execution_limits.executions < greatest(1, p_daily_limit)
+      )
+      and
+      (
+        public.codethd_execution_limits.last_run_at is null
+        or public.codethd_execution_limits.last_run_at
+          <= v_now - make_interval(secs => greatest(0, p_cooldown_seconds))
+      )
+  returning true into v_allowed;
+
+  return coalesce(v_allowed, false);
+end;
+$$;
+
+revoke all on function public.consume_codethd_execution(uuid, integer, integer) from public;
+revoke all on function public.consume_codethd_execution(uuid, integer, integer) from anon;
+revoke all on function public.consume_codethd_execution(uuid, integer, integer) from authenticated;
+grant execute on function public.consume_codethd_execution(uuid, integer, integer) to service_role;
