@@ -197,7 +197,7 @@
     const pub=client.storage.from('codethd-avatars').getPublicUrl(path);
     return await updateProfile({avatar_url:pub.data.publicUrl});
   }
-  window.CodeTHDCloud={client,emailForUsername,usernameOk,passwordOk,errorText,session,quickProfile,profile,signUp,signIn,ensureSession,requestPasswordReset,updatePassword,uploadAvatar,signOut,saveProject,ownProjects,userProjects,project,deleteProject,searchPeople,allPeople,peopleProjects,followed,isFollowing,toggleFollow,stats,updateProfile};
+  window.CodeTHDCloud={client,emailForUsername,usernameOk,passwordOk,errorText:errText,session,quickProfile,profile,signUp,signIn,ensureSession,requestPasswordReset,updatePassword,uploadAvatar,signOut,saveProject,ownProjects,userProjects,project,deleteProject,searchPeople,allPeople,peopleProjects,followed,isFollowing,toggleFollow,stats,updateProfile};
 
     })();
     const api=window.CodeTHDCloud;
