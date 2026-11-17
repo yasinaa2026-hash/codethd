@@ -203,3 +203,42 @@ revoke all on function public.consume_codethd_execution(uuid, integer, integer) 
 revoke all on function public.consume_codethd_execution(uuid, integer, integer) from anon;
 revoke all on function public.consume_codethd_execution(uuid, integer, integer) from authenticated;
 grant execute on function public.consume_codethd_execution(uuid, integer, integer) to service_role;
+
+
+-- Profile avatar bucket and row-level storage policies.
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values ('codethd-avatars', 'codethd-avatars', true, 2097152, array['image/png','image/jpeg','image/webp'])
+on conflict (id) do update
+set public=excluded.public, file_size_limit=excluded.file_size_limit, allowed_mime_types=excluded.allowed_mime_types;
+
+drop policy if exists "codethd avatar public read" on storage.objects;
+create policy "codethd avatar public read" on storage.objects for select to public
+using (bucket_id='codethd-avatars');
+
+drop policy if exists "codethd avatar insert own folder" on storage.objects;
+create policy "codethd avatar insert own folder" on storage.objects for insert to authenticated
+with check (bucket_id='codethd-avatars' and (storage.foldername(name))[1]=(select auth.uid())::text);
+
+drop policy if exists "codethd avatar update own folder" on storage.objects;
+create policy "codethd avatar update own folder" on storage.objects for update to authenticated
+using (bucket_id='codethd-avatars' and (storage.foldername(name))[1]=(select auth.uid())::text)
+with check (bucket_id='codethd-avatars' and (storage.foldername(name))[1]=(select auth.uid())::text);
+
+drop policy if exists "codethd avatar delete own folder" on storage.objects;
+create policy "codethd avatar delete own folder" on storage.objects for delete to authenticated
+using (bucket_id='codethd-avatars' and (storage.foldername(name))[1]=(select auth.uid())::text);
+
+-- These functions are invoked only by table triggers, not as browser-callable RPCs.
+revoke all on function public.handle_new_codethd_user() from public, anon, authenticated;
+revoke all on function public.touch_codethd_updated_at() from public, anon, authenticated;
+alter function public.touch_codethd_updated_at() set search_path = pg_catalog, public;
+
+-- Backfill profiles for existing Auth users when installing the schema.
+insert into public.profiles (id, username, username_norm, display_name)
+select
+  u.id,
+  left(coalesce(nullif(trim(u.raw_user_meta_data ->> 'username'), ''), 'user_' || substr(replace(u.id::text, '-', ''), 1, 10)), 30),
+  left(lower(coalesce(nullif(trim(u.raw_user_meta_data ->> 'username'), ''), 'user_' || substr(replace(u.id::text, '-', ''), 1, 10))), 30),
+  left(coalesce(nullif(trim(u.raw_user_meta_data ->> 'display_name'), ''), nullif(trim(u.raw_user_meta_data ->> 'username'), ''), 'CodeTHD user'), 80)
+from auth.users u
+on conflict (id) do nothing;

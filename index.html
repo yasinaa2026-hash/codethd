@@ -214,7 +214,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="codethd-config.js?v=20261117.3"></script>
-<script src="codethd-supabase.js?v=20261117.3"></script>
+<script src="codethd-supabase.js?v=20261117.4"></script>
 <script>
 (function(){
   document.getElementById('year').textContent = new Date().getFullYear();
@@ -225,13 +225,13 @@
     : Promise.resolve(null);
   window.CODETHD_AUTH_READY.then(function(state){
     if(!state) return;
-    ['loginLink'].forEach(function(id){
-      const link = document.getElementById(id);
-      if(link){ link.href='studio.html'; link.textContent='افتح مساحة العمل'; }
-    });
+    const account = document.getElementById('loginLink');
+    if(account){ account.href='account.html'; account.textContent='حسابي'; }
+    const footerAccount = document.querySelector('footer .footer-links a[href="auth.html"]');
+    if(footerAccount){ footerAccount.href='account.html'; }
     ['startLink','heroStartLink','bottomStartLink'].forEach(function(id){
       const link = document.getElementById(id);
-      if(link){ link.href='studio.html'; link.innerHTML='<i class="fa-solid fa-code"></i> افتح مساحة العمل'; }
+      if(link){ link.href='languages.html'; link.innerHTML='<i class="fa-solid fa-code"></i> ابدأ البرمجة'; }
     });
   });
 })();
