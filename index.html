@@ -400,6 +400,7 @@
         <div class="header-actions">
             <a class="btn" href="community.html" title="الأصدقاء والمطورون"><i class="fa-solid fa-user-group"></i> <span class="hide-mobile">الأصدقاء</span></a><a class="btn" href="projects.html" title="المشاريع"><i class="fa-solid fa-folder-open"></i> <span class="hide-mobile">المشاريع</span></a>
             <a class="btn" href="languages.html" title="لغات البرمجة"><i class="fa-solid fa-language"></i> <span class="hide-mobile">لغات البرمجة</span></a>
+            <button class="btn" id="runPreviewBtn" title="تشغيل JavaScript في المعاينة عند الطلب"><i class="fa-solid fa-play"></i> <span class="hide-mobile">تشغيل</span></button>
             <button class="btn" id="saveProjectBtn" title="حفظ المشروع فوراً"><i class="fa-solid fa-floppy-disk"></i> <span class="hide-mobile">حفظ</span></button>
             <button class="layout-toggle" id="layoutToggle" title="تبديل شكل التخطيط">
                 <i class="fa-solid fa-table-columns"></i>
@@ -493,6 +494,7 @@
         const workspace = document.getElementById('workspace');
         const clearBtn = document.getElementById('clearBtn');
         const saveProjectBtn = document.getElementById('saveProjectBtn');
+        const runPreviewBtn = document.getElementById('runPreviewBtn');
         const exportBtn = document.getElementById('exportBtn');
         const importBtn = document.getElementById('importBtn');
         const particlesContainer = document.getElementById('particles');
@@ -607,21 +609,22 @@
             });
         }
 
-        function updatePreview() {
+        function updatePreview(executeJs = false) {
             try {
                 setupConsoleInterception();
                 const html = htmlEditor.getValue();
                 const css = cssEditor.getValue();
                 const js = jsEditor.getValue();
                 const closeScript = '<' + '/script>';
-                const csp = "<meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'; img-src data: blob:; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'none'; form-action 'none'; base-uri 'none'; object-src 'none'; frame-src 'none'\">";
+                const scriptPolicy = executeJs ? "'unsafe-inline'" : "'none'";
+                const csp = '<meta http-equiv="Content-Security-Policy" content="default-src &#39;none&#39;; img-src data: blob:; style-src &#39;unsafe-inline&#39;; script-src ' + scriptPolicy + '; connect-src &#39;none&#39;; form-action &#39;none&#39;; base-uri &#39;none&#39;; object-src &#39;none&#39;; frame-src &#39;none&#39;">';
                 const safeCss = css.replace(/<\/style/gi, '<\\/' + 'style');
                 const safeJs = js.replace(/<\/script/gi, '<\\/' + 'script');
                 const bridge = "(function(){function send(type,args){parent.postMessage({source:'codethd-preview',type:type,args:Array.prototype.map.call(args,function(v){try{return typeof v==='object'?JSON.stringify(v):String(v)}catch(e){return String(v)}}).join(' ')},'*')}['log','info','warn','error'].forEach(function(type){var original=console[type].bind(console);console[type]=function(){original.apply(console,arguments);send(type,arguments)}});window.addEventListener('error',function(e){send('error',[e.message+' ('+e.lineno+':'+e.colno+')'])});window.addEventListener('unhandledrejection',function(e){send('error',[String(e.reason)])});})();";
+                const userScript = executeJs ? '<script>' + bridge + closeScript + '<script>try{' + safeJs + '}catch(e){console.error("خطأ في الكود:",e.message)}' + closeScript : '';
                 const page = '<!doctype html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">' +
                     csp + '<style>body{margin:0;padding:15px;font-family:Segoe UI,sans-serif}' + safeCss + '</style></head><body>' +
-                    html + '<script>' + bridge + closeScript + '<script>try{' + safeJs +
-                    '}catch(e){console.error("خطأ في الكود:",e.message)}' + closeScript + '</body></html>';
+                    html + userScript + '</body></html>';
                 previewArea.setAttribute('sandbox', 'allow-scripts');
                 previewArea.srcdoc = page;
             } catch (error) {
@@ -725,6 +728,10 @@
         });
 
         saveProjectBtn.addEventListener('click', saveCurrentProject);
+        runPreviewBtn.addEventListener('click', () => {
+            updatePreview(true);
+            showNotification('تم إرسال الكود للمعاينة. 🔄');
+        });
 
         exportBtn.addEventListener('click', () => {
             const html = htmlEditor.getValue();
@@ -911,7 +918,7 @@
             }
             if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
                 e.preventDefault();
-                updatePreview();
+                updatePreview(true);
                 showNotification('تم تحديث المعاينة! 🔄');
             }
         });
