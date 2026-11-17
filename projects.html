@@ -122,7 +122,9 @@ h3{font-size:1.03rem;margin-bottom:5px;word-break:break-word}
       card.className='card';
       card.innerHTML='<div class="top"><div><h3>'+esc(p.name)+'</h3><div class="owner">'+(mine?'مشروعك':'مشروع مشترك')+'</div><div class="date">'+(p.updated_at?new Date(p.updated_at).toLocaleString('ar-SA'):'')+'</div></div><div class="icon"><i class="fa-solid fa-code"></i></div></div><div class="preview"><iframe sandbox="allow-scripts" title="معاينة '+esc(p.name)+'"></iframe></div><div class="card-actions"><button class="btn primary open" type="button">فتح بالمحرر</button>'+(mine?'<button class="btn danger delete" type="button">حذف</button>':'')+'</div>';
 
-      const frame='<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><style>html,body{margin:0;min-height:100%;font-family:Arial,sans-serif}body{padding:14px}'+(p.css||'')+'</style></head><body>'+ (p.html||'') + '<script>' + String(p.js||'').replace(/<\\/script>/gi,'') + '<\\/script></body></html>';
+      const scriptEnd = '<' + '/script>';
+      const escapedJs = String(p.js||'').replace(new RegExp('<' + '/' + 'script>', 'gi'), '<' + '\\/' + 'script>');
+      const frame='<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><style>html,body{margin:0;min-height:100%;font-family:Arial,sans-serif}body{padding:14px}'+(p.css||'')+'</style></head><body>'+ (p.html||'') + '<script>' + escapedJs + scriptEnd + '</body></html>';
       card.querySelector('iframe').srcdoc=frame;
       card.querySelector('.open').onclick=()=>{
         localStorage.setItem('codethd-active-project-id',p.id);
