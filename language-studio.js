@@ -164,7 +164,7 @@
   }
   function makePreviewDocument(code) {
     const csp = createCsp();
-    const bridge = '<script>' + bridgeScript() + '<\\/script>';
+    const bridge = '<script>' + bridgeScript() + '</script>';
     const cssCode = code.replace(/<\/style/gi, '<\\/style');
     const scriptCode = escapeScriptEnd(code);
     if (language === 'HTML' && /<html[\s>]/i.test(code)) {
@@ -186,7 +186,7 @@
       body = '<main><h2>معاينة CSS</h2><p>هذا المحتوى التجريبي لتجربة التنسيقات.</p><button>زر تجريبي</button></main>';
     } else {
       body = '<main id="app"><p>JavaScript preview is ready.</p></main>';
-      userScript = '<script>' + scriptCode + '<\\/script>';
+      userScript = '<script>' + scriptCode + '</script>';
     }
     return '<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">' + csp + '<style>' + styles + '</style>' + bridge + '</head><body>' + body + userScript + '</body></html>';
   }
