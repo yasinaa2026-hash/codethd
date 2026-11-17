@@ -47,6 +47,12 @@ form{min-width:0}label{display:block;margin:13px 0 6px;font-size:.82rem;font-wei
  const $=id=>document.getElementById(id),status=(t,c='')=>{$('status').textContent=t;$('status').className='status '+c};
  try{
   status('جارٍ تحميل حسابك...');
+  if(!window.CodeTHDCloudReady) throw new Error('لم يتم تحميل خدمة الحسابات. حدّث الصفحة وتحقق من اتصال الإنترنت.');
+  await Promise.race([
+   window.CodeTHDCloudReady,
+   new Promise((_,reject)=>setTimeout(()=>reject(new Error('تأخر اتصال خدمة الحسابات. أعد تحميل الصفحة بعد التأكد من الإنترنت.')),12000))
+  ]);
+  if(!window.CodeTHDCloud || typeof window.CodeTHDCloud.ensureSession!=='function') throw new Error('خدمة الحسابات غير جاهزة. أعد تحميل الصفحة.');
   const state=await CodeTHDCloud.ensureSession();
   if(!state){location.replace('auth.html');return}
   const p=state.profile||CodeTHDCloud.quickProfile(state.session.user),user=state.session.user;
@@ -67,7 +73,12 @@ form{min-width:0}label{display:block;margin:13px 0 6px;font-size:.82rem;font-wei
    catch(err){status(CodeTHDCloud.errorText(err),'error')}finally{$('saveBtn').disabled=false}
   };
   $('logoutBtn').onclick=async()=>{$('logoutBtn').disabled=true;try{await CodeTHDCloud.signOut();location.replace('index.html')}catch(e){status(CodeTHDCloud.errorText(e),'error');$('logoutBtn').disabled=false}};
- }catch(e){status(CodeTHDCloud.errorText(e),'error')}
+ }catch(e){
+  const message=window.CodeTHDCloud && typeof window.CodeTHDCloud.errorText==='function'
+   ? window.CodeTHDCloud.errorText(e)
+   : (e?.message || 'تعذر تحميل الحساب. تحقق من اتصال الإنترنت ثم حدّث الصفحة.');
+  status(message,'error');
+ }
 })();
 </script>
 </body>
