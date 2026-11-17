@@ -231,6 +231,7 @@ using (bucket_id='codethd-avatars' and (storage.foldername(name))[1]=(select aut
 -- These functions are invoked only by table triggers, not as browser-callable RPCs.
 revoke all on function public.handle_new_codethd_user() from public, anon, authenticated;
 revoke all on function public.touch_codethd_updated_at() from public, anon, authenticated;
+alter function public.touch_codethd_updated_at() set search_path = pg_catalog, public;
 
 -- Backfill profiles for existing Auth users when installing the schema.
 insert into public.profiles (id, username, username_norm, display_name)
