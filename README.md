@@ -1,6 +1,6 @@
 # CodeTHD
 
-CodeTHD is a browser-based coding workspace. The project is currently a static GitHub Pages site with Supabase-backed accounts/projects and an optional server-side execution service.
+CodeTHD is a browser-based coding platform. The public homepage is `index.html`; the coding workspace is `studio.html`. The project is currently a static GitHub Pages site with Supabase-backed accounts/projects and an optional server-side execution service.
 
 ## Current workspace features
 
