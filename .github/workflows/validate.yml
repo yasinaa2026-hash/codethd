@@ -25,6 +25,7 @@ jobs:
           node --check language-studio.js
           node --check codethd-supabase.js
           node --check codethd-local.js
+          node scripts/check-pages.mjs
       - name: Set up Deno
         uses: denoland/setup-deno@v2
         with:
