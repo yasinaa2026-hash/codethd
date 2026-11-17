@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#08111f">
+    <meta name="description" content="CodeTHD Studio — مساحة عمل للمطورين لكتابة الأكواد وتجربتها وحفظ المشاريع.">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🦊</text></svg>">
     <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🦊</text></svg>">
     
@@ -481,7 +483,21 @@
           .tab-btn{font-size:.72rem;padding:8px 3px}
         }
 
-    </style>
+    
+        .studio-intro{position:relative;overflow:hidden;margin:14px 18px 12px;padding:20px 24px;border:1px solid var(--ct-line);border-radius:18px;background:linear-gradient(112deg,rgba(15,42,54,.98),rgba(19,32,53,.96));box-shadow:0 14px 38px rgba(0,0,0,.12)}
+        body.light-mode .studio-intro{background:linear-gradient(112deg,#e5f8f0,#edf4ff)}
+        .studio-intro:after{content:"";position:absolute;width:260px;height:260px;border:1px solid rgba(84,224,176,.12);border-radius:50%;left:13%;top:-175px;box-shadow:0 0 0 28px rgba(84,224,176,.025),0 0 0 56px rgba(84,224,176,.02);pointer-events:none}
+        .studio-intro>div:first-child{position:relative;z-index:1}
+        .hero-code-card{position:relative;z-index:1;min-width:260px;max-width:320px;padding:10px 13px;border-radius:13px;border:1px solid rgba(142,177,213,.18);background:rgba(5,13,25,.58);box-shadow:0 12px 25px rgba(0,0,0,.14);direction:ltr;text-align:left;font-family:ui-monospace,Consolas,monospace}
+        .hero-code-top{display:flex;align-items:center;gap:9px;color:#8196b2;font-size:.67rem;padding-bottom:8px;margin-bottom:6px;border-bottom:1px solid rgba(142,177,213,.14)}
+        .hero-code-top>i{margin-left:auto;color:#54e0b0}
+        .window-dots{display:flex;gap:4px}.window-dots i{width:6px;height:6px;border-radius:50%;background:#ff7777}.window-dots i:nth-child(2){background:#f6c76b}.window-dots i:nth-child(3){background:#58d8a6}
+        .hero-code-line{display:flex;gap:12px;align-items:center;padding:2px 0;font-size:.73rem;color:#dce8f7}
+        .hero-code-line>span{width:14px;color:#667b98;text-align:right}.hero-code-line b{color:#c792ea;font-weight:700}.hero-code-line em{font-style:normal;color:#c3e88d}.hero-code-line strong{font-weight:500;color:#7389a3}
+        @media(max-width:900px){.studio-intro{margin:10px 12px;padding:13px 15px}.hero-code-card{display:none}}
+        @media(max-width:560px){.studio-intro{margin:9px 10px 8px;padding:12px 13px}.studio-kicker{font-size:.62rem}.studio-intro h1{font-size:1.18rem}}
+
+</style>
 <link rel="stylesheet" href="codethd-brand.css?v=20261117.2">
 </head>
 <body class="dark-mode"><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="codethd-config.js?v=20260928.2"></script><script src="codethd-supabase.js?v=20260929.3"></script><script>window.CODETHD_AUTH_READY=CodeTHDCloud.ensureSession().catch(()=>null);</script>
@@ -508,9 +524,11 @@
                 <h1>مساحة واحدة. أفكار بلا حدود.</h1>
                 <p>اكتب الكود، جرّب فكرتك، وشاهد مشروعك يتحوّل إلى واقع.</p>
             </div>
-            <div class="studio-quickstats" aria-label="ميزات المحرر">
-                <div class="quickstat"><i class="fa-solid fa-bolt"></i><span>معاينة مباشرة</span></div>
-                <div class="quickstat"><i class="fa-solid fa-cloud-arrow-up"></i><span>حفظ مشاريعك</span></div>
+            <div class="hero-code-card" aria-hidden="true">
+                <div class="hero-code-top"><span class="window-dots"><i></i><i></i><i></i></span><span>main.js</span><i class="fa-solid fa-code"></i></div>
+                <div class="hero-code-line"><span>01</span><code><b>const</b> idea = <em>"CodeTHD"</em>;</code></div>
+                <div class="hero-code-line"><span>02</span><code><b>build</b>(idea);</code></div>
+                <div class="hero-code-line"><span>03</span><code><strong>// your next big thing</strong></code></div>
             </div>
         </section>
 
