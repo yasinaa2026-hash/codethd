@@ -13,19 +13,22 @@
   const errText=(e)=>{
     const m=String(e?.message||'').toLowerCase();
     if(m.includes('rate limit')||Number(e?.status)===429) return 'هناك ضغط مؤقت على التسجيل. انتظر قليلًا ثم حاول مرة واحدة.';
-    if(m.includes('already registered')) return 'هذا الحساب موجود بالفعل. استخدم تسجيل الدخول.';
+    if(m.includes('already registered')) return 'هذا البريد مسجّل بالفعل. استخدم تسجيل الدخول.';\n    if(m.includes('username_norm')||m.includes('duplicate key')||m.includes('unique constraint')) return 'اسم المستخدم مستخدم بالفعل. اختر اسمًا آخر.';\n    if(m.includes('email not confirmed')) return 'أكد بريدك الإلكتروني من الرسالة التي وصلتك، ثم سجّل الدخول.';
     if(m.includes('invalid login credentials')) return 'اسم المستخدم أو كلمة المرور غير صحيحة.';
     if(m.includes('email')&&m.includes('confirm')) return 'تأكيد البريد الإلكتروني مفعّل في إعدادات الحساب. عطّله ليعمل دخول Codethd بدون بريد.';
     return e?.message||'حدث خطأ غير متوقع.';
   };
-  const withTimeout=(promise,ms=6000,label='الطلب')=>Promise.race([promise,new Promise((_,reject)=>setTimeout(()=>reject(new Error(label+' استغرق وقتًا طويلًا. تحقق من الاتصال ثم جرّب مرة أخرى.')),ms))]);
-  async function session(){const r=await withTimeout(client.auth.getSession(),6000,'فحص الجلسة');if(r.error)throw r.error;return r.data.session||null}
+  const withTimeout=(promise,ms=6000,label='الطلب')=>new Promise((resolve,reject)=>{
+    const timer=setTimeout(()=>reject(new Error(label+' استغرق وقتًا طويلًا. تحقق من الاتصال ثم جرّب مرة أخرى.')),ms);
+    Promise.resolve(promise).then(value=>{clearTimeout(timer);resolve(value)},error=>{clearTimeout(timer);reject(error)});
+  });
+  async function session(){const r=await withTimeout(client.auth.getSession(),4500,'فحص الجلسة');if(r.error)throw r.error;return r.data.session||null}
   function quickProfile(user){
     const m=user?.user_metadata||{};
     const fallback=String(user?.email||'').split('@')[0]||'codethd_user';
     return {id:user?.id||'',username:String(m.username||fallback).toLowerCase(),display_name:String(m.display_name||m.username||fallback),bio:String(m.bio||''),avatar_url:m.avatar_url||null,created_at:user?.created_at||null};
   }
-  async function profile(userId){const r=await withTimeout(client.from('profiles').select('id,username,display_name,bio,avatar_url,created_at').eq('id',userId).maybeSingle(),6000,'تحميل بيانات الحساب');if(r.error)throw r.error;return r.data||null}
+  async function profile(userId){const r=await withTimeout(client.from('profiles').select('id,username,display_name,bio,avatar_url,created_at').eq('id',userId).maybeSingle(),3000,'تحميل بيانات الحساب');if(r.error)throw r.error;return r.data||null}
   async function signUp(email,username,password,displayName){
     const e=String(email||'').trim().toLowerCase(),u=cleanUsername(username);
     if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)) throw new Error('أدخل بريدًا إلكترونيًا صحيحًا.');
