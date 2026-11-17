@@ -1,0 +1,33 @@
+name: CodeTHD validation
+
+on:
+  push:
+    branches:
+      - main
+      - feature/codethd-language-studio
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  syntax:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Check browser JavaScript
+        run: |
+          node --check language-studio.js
+          node --check codethd-supabase.js
+          node --check codethd-local.js
+      - name: Set up Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Check Supabase Edge Function
+        run: deno check supabase/functions/execute-code/index.ts
