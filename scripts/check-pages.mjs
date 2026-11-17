@@ -69,4 +69,19 @@ if (errors.length) {
   console.error(errors.join("\n\n"));
   process.exit(1);
 }
+// Guard against the production signup failure caused by exporting an undefined error formatter.
+const cloudAdapterPath = path.join(root, "codethd-supabase.js");
+if (fs.existsSync(cloudAdapterPath)) {
+  const cloudAdapter = fs.readFileSync(cloudAdapterPath, "utf8");
+  if (!/const\s+errText\s*=/.test(cloudAdapter)) {
+    errors.push("codethd-supabase.js: error formatter declaration is missing");
+  }
+  if (!/errorText\s*:\s*errText/.test(cloudAdapter)) {
+    errors.push("codethd-supabase.js: CodeTHDCloud must export errorText from the declared errText function");
+  }
+}
+if (errors.length) {
+  console.error(errors.join("\n\n"));
+  process.exit(1);
+}
 console.log("CodeTHD page integrity checks passed (" + pages.length + " pages).");
