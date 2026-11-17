@@ -13,7 +13,9 @@
   const errText=(e)=>{
     const m=String(e?.message||'').toLowerCase();
     if(m.includes('rate limit')||Number(e?.status)===429) return 'هناك ضغط مؤقت على التسجيل. انتظر قليلًا ثم حاول مرة واحدة.';
-    if(m.includes('already registered')) return 'هذا البريد مسجّل بالفعل. استخدم تسجيل الدخول.';\n    if(m.includes('username_norm')||m.includes('duplicate key')||m.includes('unique constraint')) return 'اسم المستخدم مستخدم بالفعل. اختر اسمًا آخر.';\n    if(m.includes('email not confirmed')) return 'أكد بريدك الإلكتروني من الرسالة التي وصلتك، ثم سجّل الدخول.';
+    if(m.includes('already registered')) return 'هذا البريد مسجّل بالفعل. استخدم تسجيل الدخول.';
+    if(m.includes('username_norm')||m.includes('duplicate key')||m.includes('unique constraint')) return 'اسم المستخدم مستخدم بالفعل. اختر اسمًا آخر.';
+    if(m.includes('email not confirmed')) return 'أكد بريدك الإلكتروني من الرسالة التي وصلتك، ثم سجّل الدخول.';
     if(m.includes('invalid login credentials')) return 'اسم المستخدم أو كلمة المرور غير صحيحة.';
     if(m.includes('email')&&m.includes('confirm')) return 'تأكيد البريد الإلكتروني مفعّل في إعدادات الحساب. عطّله ليعمل دخول Codethd بدون بريد.';
     return e?.message||'حدث خطأ غير متوقع.';
